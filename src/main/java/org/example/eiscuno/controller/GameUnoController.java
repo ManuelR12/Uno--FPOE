@@ -2,6 +2,7 @@ package org.example.eiscuno.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -37,6 +38,7 @@ public class GameUnoController {
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
 
+
     /**
      * Initializes the controller.
      */
@@ -45,12 +47,16 @@ public class GameUnoController {
         initVariables();
         this.gameUno.startGame();
         printCardsHumanPlayer();
+        printCardsMachinePlayer();
+
+        Card cardInitial = this.table.firstCard(this.deck);
+        this.tableImageView.setImage(cardInitial.getImage());
 
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
 
-        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView);
+        threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.tableImageView, this.gameUno);
         threadPlayMachine.start();
     }
 
@@ -78,16 +84,37 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
+                Card cardInitial = this.table.getCurrentCardOnTheTable();
                 // Aqui deberian verificar si pueden en la tabla jugar esa carta
-                gameUno.playCard(card);
-                tableImageView.setImage(card.getImage());
-                humanPlayer.removeCard(findPosCardsHumanPlayer(card));
-                threadPlayMachine.setHasPlayerPlayed(true);
+
+                // pueden agregar la logica para las cargas especiales del jugador
+                if(cardInitial.getColor() == card.getColor() || cardInitial.getValue() == card.getValue() || card.getValue() == "WILD" ) {
+                    gameUno.playCard(card);
+                    tableImageView.setImage(card.getImage());
+                    humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+                    threadPlayMachine.setHasPlayerPlayed(true);
+                }
                 printCardsHumanPlayer();
             });
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
+    }
+
+    private void printCardsMachinePlayer() {
+        this.gridPaneCardsMachine.getChildren().clear();
+        
+        for (int i = 0; i < machinePlayer.getCardsPlayer().size(); i++){
+            Image img = new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
+
+            ImageView cardImageView = new ImageView(img);
+            cardImageView.setY(16);
+            cardImageView.setFitHeight(90);
+            cardImageView.setFitWidth(70);
+
+            this.gridPaneCardsMachine.add(cardImageView, i, 0);
+        }
+
     }
 
     /**
@@ -139,6 +166,10 @@ public class GameUnoController {
     @FXML
     void onHandleTakeCard(ActionEvent event) {
         // Implement logic to take a card here
+        this.gameUno.eatCard(this.humanPlayer, 1);
+        printCardsHumanPlayer();
+
+        //threadPlayMachine.setHasPlayerPlayed(true);
     }
 
     /**
