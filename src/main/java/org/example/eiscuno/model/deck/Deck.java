@@ -107,6 +107,37 @@ public class Deck {
         return deckOfCards.pop();
     }
 
+    public Card takeCardInit() {
+        if (deckOfCards.isEmpty()) {
+            throw new IllegalStateException("No hay más cartas en el mazo.");
+        }
+
+        Stack<Card> tempStack = new Stack<>();
+        Card selectedCard = null;
+
+        while (!deckOfCards.isEmpty()) {
+            Card card = deckOfCards.pop();
+
+            String cardValue = card.getValue();
+            if (cardValue != null && cardValue.matches("\\d")) {
+                selectedCard = card;
+                break;
+            }
+
+            tempStack.push(card);
+        }
+
+        while (!tempStack.isEmpty()) {
+            deckOfCards.push(tempStack.pop());
+        }
+
+        if (selectedCard == null) {
+            throw new IllegalStateException("No hay más cartas numéricas en el mazo.");
+        }
+
+        return selectedCard;
+    }
+
     /**
      * Checks if the deck is empty.
      *

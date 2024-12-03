@@ -1,6 +1,7 @@
 package org.example.eiscuno.model.table;
 
 import org.example.eiscuno.model.card.Card;
+import org.example.eiscuno.model.deck.Deck;
 
 import java.util.ArrayList;
 
@@ -37,5 +38,11 @@ public class Table {
             throw new IndexOutOfBoundsException("There are no cards on the table.");
         }
         return this.cardsTable.get(this.cardsTable.size()-1);
+    }
+
+    public Card firstCard(Deck deck) {
+        Card cardInitial = deck.takeCardInit();
+        this.addCardOnTheTable(cardInitial);
+        return cardInitial;
     }
 }
