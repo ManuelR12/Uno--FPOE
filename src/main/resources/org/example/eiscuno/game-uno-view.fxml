@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -11,37 +13,42 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: orange;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="526.0" prefWidth="832.0" style="-fx-background-color: orange;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
    <left>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="326.0" prefWidth="181.0" BorderPane.alignment="CENTER">
          <children>
-            <Button layoutX="50.0" layoutY="30.0" mnemonicParsing="false" onAction="#onHandleTakeCard" prefHeight="149.0" prefWidth="100.0" text="Baraja" />
+            <Button layoutX="43.0" layoutY="48.0" mnemonicParsing="false" onAction="#onHandleTakeCard" prefHeight="171.0" prefWidth="138.0" style="-fx-background-image: url(&quot;org/example/eiscuno/cards-uno/deck_of_cards.png&quot;); -fx-background-position: center; -fx-background-color: transparent; -fx-background-repeat: no-repeat;" />
          </children>
       </Pane>
    </left>
    <right>
       <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <Button layoutX="50.0" layoutY="75.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="50.0" prefWidth="100.0" text="UNO" />
+            <Button layoutX="7.0" layoutY="53.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="98.0" prefWidth="121.0" style="-fx-background-color: transpatent;" />
+            <ImageView fitHeight="112.0" fitWidth="125.0" layoutY="57.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@images/button_uno.png" />
+               </image>
+            </ImageView>
          </children>
       </Pane>
    </right>
    <center>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="304.0" prefWidth="451.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fx:id="tableImageView" fitHeight="149.0" fitWidth="100.0" layoutX="50.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="tableImageView" fitHeight="159.0" fitWidth="119.0" layoutX="166.0" layoutY="54.0" pickOnBounds="true" preserveRatio="true" />
          </children>
       </Pane>
    </center>
    <top>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" prefHeight="130.0" prefWidth="832.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="EISC Uno" textFill="RED">
+            <Label prefHeight="27.0" prefWidth="83.0" text="EISC Uno" textFill="RED">
                <font>
                   <Font name="Berlin Sans FB Bold" size="18.0" />
                </font>
             </Label>
-            <GridPane fx:id="gridPaneCardsMachine">
+            <GridPane fx:id="gridPaneCardsMachine" prefWidth="400.0">
               <columnConstraints>
                 <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -51,18 +58,36 @@
                <rowConstraints>
                   <RowConstraints />
                </rowConstraints>
+               <HBox.margin>
+                  <Insets right="10.0" top="20.0" />
+               </HBox.margin>
             </GridPane>
-            <Button mnemonicParsing="false" text="Salir" />
+            <Button mnemonicParsing="false" style="-fx-background-color: transparent;">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin></Button>
+            <ImageView fitHeight="53.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@images/go-out.png" />
+               </image>
+            </ImageView>
          </children>
       </HBox>
    </top>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" prefHeight="130.0" prefWidth="832.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#onHandleBack" prefWidth="74.0" style="-fx-background-color: red;" text="Anterior" textFill="WHITE">
+            <Button mnemonicParsing="false" onAction="#onHandleBack" prefHeight="72.0" prefWidth="66.0" style="-fx-background-color: transparent;" textFill="WHITE">
                <font>
                   <Font name="Berlin Sans FB" size="12.0" />
-               </font></Button>
+               </font>
+               <graphic>
+                  <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/flecha2.png" />
+                     </image>
+                  </ImageView>
+               </graphic></Button>
             <GridPane fx:id="gridPaneCardsPlayer">
               <columnConstraints>
                 <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -73,8 +98,18 @@
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
             </GridPane>
-            <Button mnemonicParsing="false" onAction="#onHandleNext" prefWidth="74.0" style="-fx-background-color: RED;" text="Siguiente" textFill="WHITE" />
+            <Button mnemonicParsing="false" onAction="#onHandleNext" prefWidth="74.0" style="-fx-background-color: transparent;" textFill="WHITE">
+               <graphic>
+                  <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/flecha.png" />
+                     </image>
+                  </ImageView>
+               </graphic></Button>
          </children>
       </HBox>
    </bottom>
