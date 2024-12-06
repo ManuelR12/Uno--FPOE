@@ -69,8 +69,8 @@ public class Deck {
             return "+4";
         } else if (name.startsWith("SKIP")){
             return "SKIP";
-        } else if (name.startsWith("RESERVE")){
-            return "RESERVE";
+        } else if (name.startsWith("REVERSE")){
+            return "REVERSE";
         } else if (name.equals("WILD")){
             return "WILD";
         }
@@ -80,15 +80,17 @@ public class Deck {
 
     }
 
-    private String getCardColor(String name){
-        if(name.contains("GREEN")){
+    private String getCardColor(String name) {
+        if (name.contains("GREEN")) {
             return "GREEN";
-        } else if(name.contains("YELLOW")){
+        } else if (name.contains("YELLOW")) {
             return "YELLOW";
-        } else if(name.contains("BLUE")){
+        } else if (name.contains("BLUE")) {
             return "BLUE";
-        } else if(name.contains("RED")){
+        } else if (name.contains("RED")) {
             return "RED";
+        } else if(name.contains("WILD")){
+            return "WILD";
         } else {
             return null;
         }
@@ -147,3 +149,4 @@ public class Deck {
         return deckOfCards.isEmpty();
     }
 }
+

@@ -72,6 +72,7 @@ public class GameUnoController {
         this.posInitCardToShow = 0;
     }
 
+
     /**
      * Prints the human player's cards on the grid pane.
      */
@@ -84,18 +85,35 @@ public class GameUnoController {
             ImageView cardImageView = card.getCard();
 
             cardImageView.setOnMouseClicked((MouseEvent event) -> {
-                Card cardInitial = this.table.getCurrentCardOnTheTable();
-                // Aqui deberian verificar si pueden en la tabla jugar esa carta
+                if (threadPlayMachine.getHasPlayerPlayed()) {
+                    // Si ya jugó, bloquea cualquier otra acción
+                    return;
+                }
 
-                // pueden agregar la logica para las cargas especiales del jugador
-                if(cardInitial.getColor() == card.getColor() || cardInitial.getValue() == card.getValue() || card.getValue() == "WILD" ) {
+                Card cardInitial = this.table.getCurrentCardOnTheTable();
+
+                // Validar si la carta se puede jugar
+                if (cardInitial.getColor() == card.getColor() || cardInitial.getValue() == card.getValue() || "WILD".equals(card.getValue()) || "WILD".equals(card.getColor())) {
+
+                    // Jugar la carta
                     gameUno.playCard(card);
                     tableImageView.setImage(card.getImage());
                     humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+
+                    // Indicar que el jugador ya jugó
                     threadPlayMachine.setHasPlayerPlayed(true);
+                } else {
+                    // Opción: mostrar un mensaje o feedback al jugador indicando que no puede jugar esa carta
+                    System.out.println("No puedes jugar esa carta.");
                 }
+
+                debugCardInfo(card);
+
+                // Actualizar las cartas visibles del jugador
                 printCardsHumanPlayer();
             });
+
+
 
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
@@ -103,7 +121,7 @@ public class GameUnoController {
 
     private void printCardsMachinePlayer() {
         this.gridPaneCardsMachine.getChildren().clear();
-        
+
         for (int i = 0; i < machinePlayer.getCardsPlayer().size(); i++){
             Image img = new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
 
@@ -158,6 +176,37 @@ public class GameUnoController {
         }
     }
 
+    private boolean hasValidCardToPlay() {
+        // Obtener la última carta en la mesa
+        Card currentCardOnTable = this.table.getCurrentCardOnTheTable();
+
+        // Verificar si el jugador tiene alguna carta válida
+        for (Card card : this.humanPlayer.getCardsPlayer()) {
+            if (card.getColor() == currentCardOnTable.getColor() ||
+                    card.getValue() == currentCardOnTable.getValue() ||
+                    "WILD".equals(card.getValue())) {
+                return true;  // El jugador tiene una carta válida para jugar
+            }
+        }
+        return false;  // El jugador no tiene cartas válidas para jugar
+    }
+
+    private void debugCardInfo(Card card) {
+        if (card != null) {
+            // Si la carta es de tipo WILD o de color normal
+            String cardInfo = "Carta seleccionada: ";
+            if ("WILD".equals(card.getValue())) {
+                cardInfo += "Tipo: WILD, ";
+            } else {
+                cardInfo += "Tipo: " + card.getColor() + ", ";
+            }
+            cardInfo += "Número: " + card.getValue();
+            System.out.println(cardInfo);  // Imprime la información de la carta
+        }
+    }
+
+
+
     /**
      * Handles the action of taking a card.
      *
@@ -165,11 +214,33 @@ public class GameUnoController {
      */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
-        // Implement logic to take a card here
+        // Verificar si es el turno del jugador
+        if (threadPlayMachine.getHasPlayerPlayed()) {
+            System.out.println("Ya jugaste, no puedes robar más cartas.");
+            return; // Si ya jugó, no permitir que robe más cartas.
+        }
+
+        // Verificar si el jugador tiene cartas válidas para jugar
+        if (hasValidCardToPlay()) {
+            System.out.println("Tienes cartas válidas para jugar, debes jugar una carta.");
+            return;  // Si tiene cartas válidas, no permite robar más cartas
+        }
+
+        // El jugador roba una carta si no tiene cartas válidas
         this.gameUno.eatCard(this.humanPlayer, 1);
         printCardsHumanPlayer();
 
-        //threadPlayMachine.setHasPlayerPlayed(true);
+        // Verificar si la última carta del jugador es válida para jugar
+        Card lastCard = this.humanPlayer.getCardsPlayer().get(this.humanPlayer.getCardsPlayer().size() - 1);
+        Card currentCardOnTable = this.table.getCurrentCardOnTheTable();
+
+        if (!(lastCard.getColor() == currentCardOnTable.getColor() ||
+                lastCard.getValue() == currentCardOnTable.getValue() ||
+                "WILD".equals(lastCard.getValue()))) {
+            // La carta no es válida, se salta el turno del jugador
+            System.out.println("No puedes jugar la carta robada. Turno saltado.");
+            threadPlayMachine.setHasPlayerPlayed(true);  // Saltar el turno del jugador
+        }
     }
 
     /**

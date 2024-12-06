@@ -13,6 +13,8 @@ public class ThreadPlayMachine extends Thread {
     private ImageView tableImageView;
     private GameUno gameUno;
     private volatile boolean hasPlayerPlayed;
+    private boolean modelTurn;
+
 
     public ThreadPlayMachine(Table table, Player machinePlayer, ImageView tableImageView, GameUno gameUno) {
         this.table = table;
@@ -33,9 +35,15 @@ public class ThreadPlayMachine extends Thread {
                 // Aqui iria la logica de colocar la carta
                 putCardOnTheTable();
                 hasPlayerPlayed = false;
+
             }
         }
     }
+
+    public boolean getHasPlayerPlayed(){
+        return hasPlayerPlayed;
+    }
+
 
     private void putCardOnTheTable(){
         int index = findIndex();
