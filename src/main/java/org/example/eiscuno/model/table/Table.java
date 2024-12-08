@@ -45,4 +45,15 @@ public class Table {
         this.addCardOnTheTable(cardInitial);
         return cardInitial;
     }
+
+    public void setCurrentCardColor(String color) {
+        // Asegúrate de que haya una carta en la mesa
+        if (!cardsTable.isEmpty()) {
+            Card currentCard = cardsTable.get(cardsTable.size() - 1);
+            currentCard.setColor(color);  // Cambiar el color de la carta
+        } else {
+            throw new IndexOutOfBoundsException("There are no cards on the table.");
+        }
+    }
+
 }
