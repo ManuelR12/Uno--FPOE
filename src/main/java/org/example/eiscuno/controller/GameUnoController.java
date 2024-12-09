@@ -1,17 +1,20 @@
 package org.example.eiscuno.controller;
 
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import org.example.eiscuno.model.Animations.AnimationAdapter;
+import org.example.eiscuno.model.Animations.GameStageAnimations;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
@@ -23,6 +26,8 @@ import org.example.eiscuno.model.table.Table;
 
 /**
  * Controller class for the Uno game.
+ *
+ * TODO: ERASE ALL THE DEBUG METHODS IN THIS AND OTHER CLASSES. STILL IN THIS VERSION.
  */
 public class GameUnoController {
 
@@ -42,8 +47,14 @@ public class GameUnoController {
     private Button greenPicker;
     @FXML
     private AnchorPane colorPickers;
-
-    private volatile boolean isPickingColor; // Controla si el jugador está eligiendo un color
+    @FXML
+    private Label drawNumber;
+    @FXML
+    private AnchorPane cardsDrawedPane;
+    @FXML
+    private TextField colorTxtField;
+    @FXML
+    private TextField turnTxtField;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -53,6 +64,7 @@ public class GameUnoController {
     private int posInitCardToShow;
     private cardRules rules;
     private String selectedColor;
+    private GameStageAnimations animations;
 
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
@@ -67,24 +79,58 @@ public class GameUnoController {
         printCardsHumanPlayer();
         printCardsMachinePlayer();
         rules = new cardRules(gameUno);
+        cardsDrawedPane.setOpacity(0);
 
         Card cardInitial = this.table.firstCard(this.deck);
         this.tableImageView.setImage(cardInitial.getImage());
 
+        colorPickers.setOpacity(0);
+        // Actualizar visualmente la mano de la máquina
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         t.start();
-
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.humanPlayer, this.tableImageView, this.gameUno, this.rules);
         threadPlayMachine.start();
+        threadPlayMachine.setOnMachinePlayedCallback(this::runUpdateMachinePlay);
+        threadPlayMachine.setOnCardEatenCallback(this::runUpdateMachineAte);
+        threadPlayMachine.setOnEatCardPlacedCallBack(this::runAnimationAndUpdate);
+        threadPlayMachine.setOnColorChangedByMachineCallBack(this::writeOnColorInfo);
 
-        colorPickers.setOpacity(0);
-        // Actualizar visualmente la mano de la máquina
-        threadPlayMachine.setOnMachinePlayedCallback(this::removeLastCardFromMachinePlayerGrid);
-        threadPlayMachine.setOnCardEatenCallback(this::printCardsMachinePlayer);
+        writeOnColorInfo();
+        writeOnTurnInfo();
+
 
     }
 
+    private void runAnimationAndUpdate(){
+        printCardsHumanPlayer();
+        animateDrawedCards();
+    }
+
+    private void runUpdateMachinePlay(){
+        printCardsMachinePlayer();
+        writeOnColorInfo();
+        writeOnTurnInfo();
+    }
+
+    private void runUpdateMachineAte(){
+        printCardsMachinePlayer();
+        writeOnTurnInfo();
+        writeOnColorInfo();
+    }
+
+    private void writeOnColorInfo(){
+        colorTxtField.setText(table.getCurrentCardOnTheTable().getColor());
+    }
+
+    private void writeOnTurnInfo(){
+        if(threadPlayMachine.getHasPlayerPlayed()){
+            turnTxtField.setText("Machine");
+        } else{
+            turnTxtField.setText("Human");
+        }
+
+    }
     /**
      * Initializes the variables for the game.
      */
@@ -95,6 +141,7 @@ public class GameUnoController {
         this.table = new Table();
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
+        this.animations = new GameStageAnimations();
     }
 
 
@@ -121,7 +168,7 @@ public class GameUnoController {
 
                 Card cardInitial = this.table.getCurrentCardOnTheTable();
 
-                if (cardInitial.getColor() == card.getColor() || cardInitial.getValue() == card.getValue() ||
+                if (cardInitial.getColor().equals(card.getColor())|| cardInitial.getValue().equals(card.getValue())||
                         "WILD_CARD".equals(card.getValue()) || "WILD".equals(card.getColor())) {
 
                     if ("WILD".equals(card.getColor())) {
@@ -130,21 +177,14 @@ public class GameUnoController {
                         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
                         if(card.getValue().equals("+4")){
                             rules.applySpecialCardEffect(card, machinePlayer);
+                            animateDrawedCards();
                             if(rules.getPLayerAte()){
                                 printCardsMachinePlayer();
                                 rules.setPlayerAte(false);
                             }
                         }
                         threadPlayMachine.setIsColorSelected(false);
-                        colorPicker(card, cardInitial, gameUno);
-                        for (Card item : humanPlayer.getCardsPlayer()) {
-                            System.out.println(item);
-                        }
-                        System.out.println("//////");
-                        System.out.println("CARTAS MAQUINA");
-                        for (Card item : machinePlayer.getCardsPlayer()) {
-                            System.out.println(item);
-                        }
+                        colorPicker(card);
 
                     } else{
                         rules.applySpecialCardEffect(card, machinePlayer);
@@ -157,15 +197,19 @@ public class GameUnoController {
                                 rules.setPlayerAte(false);
                             }
                         }
-                        threadPlayMachine.setHasPlayerPlayed(true);
-                        for (Card item : humanPlayer.getCardsPlayer()) {
-                            System.out.println(item);
+                        if(card.getValue().equals("REVERSE")||card.getValue().equals("SKIP")||card.getValue().equals("+2")){
+                            if(card.getValue().equals("+2")){
+                                animateDrawedCards();
+                            }
+                            writeOnColorInfo();
+                            threadPlayMachine.setIsColorSelected(false);
+                            writeOnTurnInfo();
+                        }else{
+                            writeOnColorInfo();
+                            threadPlayMachine.setHasPlayerPlayed(true);
+                            writeOnTurnInfo();
                         }
-                        System.out.println("//////");
-                        System.out.println("CARTAS MAQUINA");
-                        for (Card item : machinePlayer.getCardsPlayer()) {
-                            System.out.println(item);
-                        }
+
                     }
                 } else {
                     System.out.println("No puedes jugar esa carta.");
@@ -175,39 +219,38 @@ public class GameUnoController {
                 printCardsHumanPlayer();
             });
 
-
             // Agregar la carta a la interfaz del jugador
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
     }
 
 
-    private void colorPicker(Card card, Card initialCard, GameUno gameUno) {
+    private void colorPicker(Card card) {
         colorPickers.setOpacity(1);
 
         redPicker.setOnAction(event -> {
             selectedColor = "RED";
-            handleColorPick(card, initialCard, gameUno);  // Llamar a handleColorPick solo después de seleccionar el color
+            handleColorPick(card);  // Llamar a handleColorPick solo después de seleccionar el color
         });
 
         yellowPicker.setOnAction(event -> {
             selectedColor = "YELLOW";
-            handleColorPick(card, initialCard, gameUno);
+            handleColorPick(card);
         });
 
         bluePicker.setOnAction(event -> {
             selectedColor = "BLUE";
-            handleColorPick(card, initialCard,gameUno);
+            handleColorPick(card);
         });
 
         greenPicker.setOnAction(event -> {
             selectedColor = "GREEN";
-            handleColorPick(card, initialCard, gameUno);
+            handleColorPick(card);
         });
     }
 
 
-    private void handleColorPick(Card card, Card initialCard, GameUno gameUno){
+    private void handleColorPick(Card card){
         String pickedColor = null;
 
         // Verificar que selectedColor no sea null
@@ -244,8 +287,9 @@ public class GameUnoController {
             String finalPickedColor = pickedColor;
             Platform.runLater(() -> {
                 table.setCurrentCardColor(finalPickedColor);
+                writeOnColorInfo();
                 // Realizamos las acciones que corresponden después de seleccionar el color
-                threadPlayMachine.setHasPlayerPlayed(true);
+                threadPlayMachine.setHasPlayerPlayed(!card.getValue().equals("+4"));
                 threadPlayMachine.setIsColorSelected(true);
             });
         }
@@ -279,44 +323,20 @@ public class GameUnoController {
         }
     }
 
-
-    private void removeLastCardFromMachinePlayerGrid() {
-        // Verifica si hay hijos en el GridPane antes de intentar eliminar
-        if (!this.gridPaneCardsMachine.getChildren().isEmpty()) {
-            // Encuentra el nodo en la última columna
-            Node lastNode = null;
-            int maxColumn = -1;
-
-            for (Node node : this.gridPaneCardsMachine.getChildren()) {
-                Integer columnIndex = GridPane.getColumnIndex(node);
-                if (columnIndex != null && columnIndex > maxColumn) {
-                    maxColumn = columnIndex;
-                    lastNode = node;
-                }
-            }
-
-            // Si se encuentra el último nodo, eliminarlo
-            if (lastNode != null) {
-                this.gridPaneCardsMachine.getChildren().remove(lastNode);
-            }
+    private void animateDrawedCards() {
+        Card actualCard = table.getCurrentCardOnTheTable();
+        if(actualCard.getValue().equals("+4")){
+            drawNumber.setText("+4");
+        }else if(actualCard.getValue().equals("+2")){
+            drawNumber.setText("+2");
         }
+        SequentialTransition sequentialTransition = new SequentialTransition(
+                animations.fadeIn(cardsDrawedPane, 1), animations.fadeOut(cardsDrawedPane,1)
+        );
+
+        sequentialTransition.play();
+
     }
-
-    private void addCardToMachinePlayerGrid() {
-        for (int i = 0; i < threadPlayMachine.getCardsToEat(); i++){
-            Image img = new Image(getClass().getResource("/org/example/eiscuno/cards-uno/card_uno.png").toExternalForm());
-
-            ImageView cardImageView = new ImageView(img);
-            cardImageView.setY(16);
-            cardImageView.setFitHeight(90);
-            cardImageView.setFitWidth(70);
-
-            this.gridPaneCardsMachine.add(cardImageView, i, 0);
-        }
-    }
-
-
-
 
     /**
      * Finds the position of a specific card in the human player's hand.
@@ -365,9 +385,9 @@ public class GameUnoController {
 
         // Verificar si el jugador tiene alguna carta válida
         for (Card card : this.humanPlayer.getCardsPlayer()) {
-            if (card.getColor() == currentCardOnTable.getColor() ||
-                    card.getValue() == currentCardOnTable.getValue() ||
-                    "WILD".equals(card.getValue())) {
+            if (card.getColor().equals(currentCardOnTable.getColor())||
+                    card.getValue().equals(currentCardOnTable.getValue()) ||
+                    "WILD".equals(card.getColor())) {
                 return true;  // El jugador tiene una carta válida para jugar
             }
         }
@@ -415,12 +435,16 @@ public class GameUnoController {
         Card lastCard = this.humanPlayer.getCardsPlayer().get(this.humanPlayer.getCardsPlayer().size() - 1);
         Card currentCardOnTable = this.table.getCurrentCardOnTheTable();
 
-        if (!(lastCard.getColor() == currentCardOnTable.getColor() ||
-                lastCard.getValue() == currentCardOnTable.getValue() ||
-                "WILD".equals(lastCard.getValue()))) {
+        // Verificar si la carta robada es válida
+        if (!(lastCard.getColor().equals(currentCardOnTable.getColor()) ||
+                lastCard.getValue().equals(currentCardOnTable.getValue()) ||
+                "WILD".equals(lastCard.getColor()) || "WILD".equals(lastCard.getValue()))) {
             // La carta no es válida, se salta el turno del jugador
             System.out.println("No puedes jugar la carta robada. Turno saltado.");
-            threadPlayMachine.setHasPlayerPlayed(true);  // Saltar el turno del jugador
+            threadPlayMachine.setHasPlayerPlayed(true);
+            writeOnTurnInfo();// Saltar el turno del jugador
+        } else {
+            System.out.println("La carta robada es válida, puedes jugarla.");
         }
     }
 

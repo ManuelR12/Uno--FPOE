@@ -27,16 +27,13 @@ public class cardRules {
     public void applySpecialCardEffect(Card card, Player nextPlayer) {
         switch (card.getValue()) {
             case "REVERSE":
-                applyReverse();
+                applyReverseOrSkip(nextPlayer);
                 break;
             case "SKIP":
-                applySkip();
+                applyReverseOrSkip(nextPlayer);
                 break;
             case "+2":
                 applyPlusTwo(nextPlayer);
-                break;
-            case "WILD":
-                applyWild(card);
                 break;
             case "+4":
                 applyPlusFour(nextPlayer);
@@ -46,13 +43,8 @@ public class cardRules {
         }
     }
 
-    private void applyReverse() {
-        System.out.println("Turn order reversed!");
-        // TODO: Add logic to reverse turn order in GameUno.
-    }
-
-    private void applySkip() {
-        System.out.println("Next player's turn skipped!");
+    private void applyReverseOrSkip(Player nextPlayer) {
+        System.out.println("Turn order reversed or turn skipped!");
     }
 
     private boolean applyPlusTwo(Player nextPlayer) {
@@ -75,10 +67,5 @@ public class cardRules {
     public void setPlayerAte(boolean playerAte) {
         this.playerAte = playerAte;
     }
-
-    private void applyWild(Card card) {
-        System.out.println("Wild card played! Color changed to: ");
-    }
-
 
 }

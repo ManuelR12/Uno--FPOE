@@ -1,18 +1,14 @@
 package org.example.eiscuno.model.machine;
 
 import javafx.application.Platform;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.example.eiscuno.controller.GameUnoController;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.game.cardRules;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
-
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.function.Consumer;
 
 public class ThreadPlayMachine extends Thread {
     private Table table;
@@ -21,13 +17,11 @@ public class ThreadPlayMachine extends Thread {
     private ImageView tableImageView;
     private GameUno gameUno;
     private volatile boolean hasPlayerPlayed;
-    private boolean modelTurn;
     private volatile boolean isColorSelected;
-    private volatile boolean machinePlayed;
     private Runnable onMachinePlayedCallback;
     private Runnable onCardEatenCallback;
-    private volatile int cardsToEat = 0;
-    private volatile boolean cardEaten;
+    private Runnable onEatCardPlacedCallBack;
+    private Runnable onColorChangedByMachineCallBack;
     ArrayList<String> colorsToPick = new ArrayList<>();
     private cardRules rules;
 
@@ -53,6 +47,16 @@ public class ThreadPlayMachine extends Thread {
     public void setOnCardEatenCallback(Runnable onCardEatenCallback) {
         this.onCardEatenCallback = onCardEatenCallback;
     }
+
+    public void setOnEatCardPlacedCallBack(Runnable onEatCardPlacedCallBack){
+        this.onEatCardPlacedCallBack = onEatCardPlacedCallBack;
+    }
+
+    public void setOnColorChangedByMachineCallBack(Runnable onColorChangedByMachineCallBack){
+        this.onColorChangedByMachineCallBack = onColorChangedByMachineCallBack;
+    }
+
+
 
 
 
@@ -105,43 +109,80 @@ public class ThreadPlayMachine extends Thread {
         return hasPlayerPlayed;
     }
 
-
-    public int getCardsToEat() {
-        return cardsToEat;
-    }
-
-    private void putCardOnTheTable(){
+    private void putCardOnTheTable() {
         int index = findIndex();
 
-        if(index == -1) {
-            System.out.println("la maquina tiene que comer");
+        if (index == -1) {
+            System.out.println("La máquina tiene que comer");
             gameUno.eatCard(this.machinePlayer, 1);
-            cardsToEat = 1;
             index = findIndex();
             if (onCardEatenCallback != null) {
                 Platform.runLater(onCardEatenCallback);
             }
         }
 
-        if(index == -1) {
-            System.out.println("la maquina pasa");
-            machinePlayed = false;
+        if (index == -1) {
+            System.out.println("La máquina pasa");
             return;
         }
 
         Card card = machinePlayer.getCard(index);
+        rules.applySpecialCardEffect(card, humanPlayer);
         this.machinePlayer.removeCard(index);
         table.addCardOnTheTable(card);
         tableImageView.setImage(card.getImage());
-        if(card.getColor().equals("WILD")){
+
+        // Manejar cartas especiales
+        if (card.getColor().equals("WILD")) {
             Random random = new Random();
             int randomIndex = random.nextInt(colorsToPick.size());
             card.setColor(colorsToPick.get(randomIndex));
+            System.out.println("Color changed to: " + card.getColor());
+            if(onColorChangedByMachineCallBack != null){
+                Platform.runLater(onColorChangedByMachineCallBack);
+            }
+            if (card.getValue().equals("+4")) {
+                if (onEatCardPlacedCallBack != null) {
+                    Platform.runLater(onEatCardPlacedCallBack);
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                putCardOnTheTable();
+            }else{
+                if (onMachinePlayedCallback != null) {
+                    Platform.runLater(onMachinePlayedCallback);
+                }
+                hasPlayerPlayed = false;
+
+            }
         }
-        rules.applySpecialCardEffect(card,humanPlayer);
-        // Llamar al callback después de que la máquina juegue
-        if (onMachinePlayedCallback != null) {
-            Platform.runLater(onMachinePlayedCallback);
+
+
+        if (card.getValue().equals("REVERSE") || card.getValue().equals("SKIP")||card.getValue().equals("+2")) {
+            System.out.println("MachinePlayer played a special card!: " + card.getValue());
+            // Permitir que la máquina vuelva a jugar
+            if(card.getValue().equals("+2")) {
+                if(onEatCardPlacedCallBack != null){
+                    Platform.runLater(onEatCardPlacedCallBack);
+                }
+            }
+            try{
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            putCardOnTheTable();
+        } else {
+            // Finalizar turno de la máquina
+            if (onMachinePlayedCallback != null) {
+                Platform.runLater(onMachinePlayedCallback);
+            }
+            hasPlayerPlayed = false;
         }
     }
 
@@ -153,7 +194,7 @@ public class ThreadPlayMachine extends Thread {
             Card cardMachine = this.machinePlayer.getCardsPlayer().get(i);
 
             // Lógica modificada para tratar la carta "WILD"
-            if (cardTable.getValue().equals("WILD") || cardMachine.getColor().equals(cardTable.getColor()) || cardMachine.getValue().equals(cardTable.getValue())) {
+            if (cardMachine.getColor().equals("WILD") || cardMachine.getColor().equals(cardTable.getColor()) || cardMachine.getValue().equals(cardTable.getValue())) {
                 index = i;
                 break;
             }
@@ -162,16 +203,11 @@ public class ThreadPlayMachine extends Thread {
         return index;
     }
 
-
     public void setHasPlayerPlayed(boolean hasPlayerPlayed) {
         this.hasPlayerPlayed = hasPlayerPlayed;
     }
 
     public void setIsColorSelected(boolean isColorSelected) {
         this.isColorSelected = isColorSelected;
-    }
-
-    public boolean getisColorSelected() {
-        return isColorSelected;
     }
 }

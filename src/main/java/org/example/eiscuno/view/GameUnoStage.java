@@ -29,7 +29,7 @@ public class GameUnoStage extends Stage {
         }
         Scene scene = new Scene(root);
         // Configuring the stage
-        setTitle("EISC Uno"); // Sets the title of the stage
+        setTitle("UNO"); // Sets the title of the stage
         setScene(scene); // Sets the scene for the stage
         setResizable(false); // Disallows resizing of the stage
         show(); // Displays the stage
