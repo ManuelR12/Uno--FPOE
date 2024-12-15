@@ -61,6 +61,8 @@ public class GameUnoController {
     private TextField turnTxtField;
     @FXML
     private Button unoButton;
+    @FXML
+    private Label gameStatusLabel;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -126,6 +128,7 @@ public class GameUnoController {
         printCardsMachinePlayer();
         writeOnColorInfo();
         writeOnTurnInfo();
+        checkGameEnd();
     }
 
     private void runUpdateMachineAte(){
@@ -208,6 +211,7 @@ public class GameUnoController {
         } else {
             playRegularCard(card);
         }
+        checkGameEnd();
     }
 
     private void playWildCard(Card card) {
@@ -446,6 +450,7 @@ public class GameUnoController {
     private void takeCardAndPrint() {
         this.gameUno.eatCard(this.humanPlayer, 1);
         printCardsHumanPlayer();
+        checkGameEnd();
     }
 
     private boolean isLastCardPlayable() {
@@ -554,6 +559,17 @@ public class GameUnoController {
      */
     private double randomTimeBetween(int min, int max) {
         return min + Math.random() * (max - min);
+    }
+
+    /**
+     * Verifica si el jugador humano o la máquina han ganado la partida.
+     */
+    private void checkGameEnd() {
+        if (humanPlayer.getCardsPlayer().isEmpty()) {
+            gameStatusLabel.setText("¡GANASTE!");
+        } else if (machinePlayer.getCardsPlayer().isEmpty()) {
+            gameStatusLabel.setText("HAS PERDIDO");
+        }
     }
 }
 

@@ -101,6 +101,11 @@
                   </Label>
                </children>
             </AnchorPane>
+            <Label fx:id="gameStatusLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="41.0" prefWidth="158.0" textAlignment="CENTER" textFill="RED">
+               <font>
+                  <Font name="Impact" size="29.0" />
+               </font>
+            </Label>
          </children>
       </Pane>
    </right>
