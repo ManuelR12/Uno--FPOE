@@ -1,6 +1,9 @@
 package org.example.eiscuno.controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +16,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.util.Duration;
 import org.example.eiscuno.model.Animations.AnimationAdapter;
 import org.example.eiscuno.model.Animations.GameStageAnimations;
 import org.example.eiscuno.model.card.Card;
@@ -55,6 +59,8 @@ public class GameUnoController {
     private TextField colorTxtField;
     @FXML
     private TextField turnTxtField;
+    @FXML
+    private Button unoButton;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -69,6 +75,10 @@ public class GameUnoController {
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
 
+    private Timeline machineUnoTimer;
+    private boolean machineDeclaredUNO;
+
+
     /**
      * Initializes the controller.
      */
@@ -76,6 +86,7 @@ public class GameUnoController {
     public void initialize() {
         initVariables();
         this.gameUno.startGame();
+        machineDeclaredUNO = false;
         printCardsHumanPlayer();
         printCardsMachinePlayer();
         colorTxtField.setEditable(false);
@@ -101,6 +112,7 @@ public class GameUnoController {
 
         writeOnColorInfo();
         writeOnTurnInfo();
+
 
 
     }
@@ -145,6 +157,7 @@ public class GameUnoController {
         this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
         this.posInitCardToShow = 0;
         this.animations = new GameStageAnimations();
+        rules = new cardRules(gameUno);
     }
 
 
@@ -174,6 +187,7 @@ public class GameUnoController {
             Card cardInitial = this.table.getCurrentCardOnTheTable();
             if (isCardPlayable(card, cardInitial)) {
                 playCard(card);
+                checkUNO();
             } else {
                 System.out.println("No puedes jugar esa carta.");
             }
@@ -219,6 +233,7 @@ public class GameUnoController {
         gameUno.playCard(card);
         tableImageView.setImage(card.getImage());
         humanPlayer.removeCard(findPosCardsHumanPlayer(card));
+        checkUNO();
 
         if (card.getValue().equals("+2") && rules.getPLayerAte()) {
             printCardsMachinePlayer();
@@ -451,10 +466,95 @@ public class GameUnoController {
     /**
      * Handles the action of saying "Uno".
      *
-     * @param event the action event
      */
+    private void checkUNO() {
+        if (humanPlayer.getCardsPlayer().size() == 1) {
+            unoButton.setVisible(true);
+            startHumanUnoTimer();
+        }
+    }
+
+
+    private void penalizeUNO() {
+        // Verifica si el botón aún está visible (no presionado)
+        if (unoButton.isVisible()) {
+            gameUno.eatCard(humanPlayer, 1); // Hace que el jugador robe una carta
+            unoButton.setVisible(false);    // Oculta el botón después de la penalización
+            System.out.println("El jugador no declaró UNO a tiempo. Penalizado con una carta.");
+        }
+    }
+
+
     @FXML
-    void onHandleUno(ActionEvent event) {
-        // Implement logic to handle Uno event here
+    public void onHandleUno(ActionEvent event) {
+        if (humanPlayer.getCardsPlayer().size() == 1) {
+            unoButton.setVisible(false);
+            System.out.println("Declaraste UNO correctamente.");
+        }
+    }
+
+    /**
+     * Verifica
+
+    /**
+     * Temporizador para penalizar al jugador humano si no declara UNO a tiempo.
+     */
+    private void startHumanUnoTimer() {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(4), event -> penalizeHumanUNO()));
+        timeline.setCycleCount(1);
+        timeline.play();
+    }
+
+    private void penalizeHumanUNO() {
+        if (unoButton.isVisible()) {
+            gameUno.eatCard(humanPlayer, 2); // Penalización con 2 cartas
+            unoButton.setVisible(false);
+            System.out.println("No declaraste UNO a tiempo. Penalizado con 2 cartas.");
+        }
+    }
+
+    /**
+     * Verifica si la máquina debe declarar UNO y simula su reacción.
+     */
+    private void checkMachineUNO() {
+        if (machinePlayer.getCardsPlayer().size() == 1) {
+            machineDeclaredUNO = false;
+            startMachineUnoTimer();
+        }
+    }
+
+    /**
+     * Temporizador para simular el tiempo de reacción de la máquina al declarar UNO.
+     */
+    private void startMachineUnoTimer() {
+        machineUnoTimer = new Timeline(new KeyFrame(Duration.seconds(randomTimeBetween(2, 4)), event -> {
+            if (!machineDeclaredUNO) {
+                penalizeMachineUNO();
+            }
+        }));
+        machineUnoTimer.setCycleCount(1);
+        machineUnoTimer.play();
+    }
+
+    @FXML
+    public void onPlayerPenalizeMachine(ActionEvent event) {
+        if (!machineDeclaredUNO && machinePlayer.getCardsPlayer().size() == 1) {
+            gameUno.eatCard(machinePlayer, 2); // Penalización con 2 cartas
+            machineUnoTimer.stop();
+        }
+    }
+
+    private void penalizeMachineUNO() {
+        gameUno.eatCard(machinePlayer, 2); // Penalización con 2 cartas
+        System.out.println("La máquina no declaró UNO a tiempo. Penalizada con 2 cartas.");
+    }
+
+    /**
+     * Genera un tiempo aleatorio entre min y max segundos.
+     */
+    private double randomTimeBetween(int min, int max) {
+        return min + Math.random() * (max - min);
     }
 }
+
+
