@@ -65,35 +65,35 @@
             </Label>
             <TextField fx:id="colorTxtField" layoutX="105.0" layoutY="171.0" prefHeight="25.0" prefWidth="69.0">
                <font>
-                  <Font name="Onyx" size="15.0" />
+                  <Font name="Impact" size="15.0" />
                </font>
             </TextField>
             <TextField fx:id="turnTxtField" layoutX="105.0" layoutY="199.0" prefHeight="25.0" prefWidth="69.0">
                <font>
-                  <Font name="Onyx" size="15.0" />
+                  <Font name="Impact" size="15.0" />
                </font>
             </TextField>
             <AnchorPane fx:id="cardsDrawedPane" layoutX="-21.0" layoutY="212.0" prefHeight="45.0" prefWidth="0.0">
                <children>
-                  <Label fx:id="drawNumber" layoutX="77.0" layoutY="12.0" textFill="#ada4ff">
+                  <Label fx:id="drawNumber" alignment="CENTER" layoutX="79.0" layoutY="15.0" prefHeight="35.0" prefWidth="42.0" textFill="WHITE">
                      <font>
-                        <Font name="Onyx" size="24.0" />
+                        <Font name="Onyx" size="31.0" />
                      </font>
                      <effect>
                         <Bloom />
                      </effect>
                   </Label>
-                  <Label fx:id="cardsLabel" layoutX="101.0" layoutY="12.0" text="cards!" textFill="#ada4ff">
+                  <Label fx:id="cardsLabel" layoutX="121.0" layoutY="15.0" text="cards!" textFill="WHITE">
                      <font>
-                        <Font name="Onyx" size="24.0" />
+                        <Font name="Onyx" size="31.0" />
                      </font>
                      <effect>
                         <Bloom />
                      </effect>
                   </Label>
-                  <Label fx:id="drawLabel" layoutX="42.0" layoutY="12.0" text="Draw" textFill="#ada4ff">
+                  <Label fx:id="drawLabel" layoutX="39.0" layoutY="15.0" text="Draw" textFill="WHITE">
                      <font>
-                        <Font name="Onyx" size="24.0" />
+                        <Font name="Onyx" size="31.0" />
                      </font>
                      <effect>
                         <Bloom />
@@ -106,6 +106,12 @@
                   <Font name="Impact" size="29.0" />
                </font>
             </Label>
+            <ImageView fx:id="penalizeButtonView" fitHeight="76.0" fitWidth="66.0" layoutX="141.0" layoutY="26.0" mouseTransparent="true">
+               <image>
+                  <Image url="@images/alert_button.png" />
+               </image>
+            </ImageView>
+            <Button fx:id="penalizeButton" layoutX="147.0" layoutY="31.0" mnemonicParsing="false" onAction="#handlePenalizeMachine" prefHeight="70.0" prefWidth="56.0" style="-fx-background-color: transparent;" textFill="TRANSPARENT" />
          </children>
       </Pane>
    </right>
@@ -167,7 +173,7 @@
                <HBox.margin>
                   <Insets />
                </HBox.margin></Button>
-            <ImageView fitHeight="53.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="53.0" fitWidth="46.0" onMouseClicked="#handleExitGame" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@images/go-out.png" />
                </image>

@@ -7,15 +7,14 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.eiscuno.model.Animations.AnimationAdapter;
 import org.example.eiscuno.model.Animations.GameStageAnimations;
@@ -23,10 +22,14 @@ import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
 import org.example.eiscuno.model.game.GameUno;
 import org.example.eiscuno.model.game.cardRules;
+import org.example.eiscuno.model.machine.ThreadMonitorMachine;
 import org.example.eiscuno.model.machine.ThreadPlayMachine;
 import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
+import org.example.eiscuno.view.GameUnoStage;
+
+import java.io.IOException;
 
 /**
  * Controller class for the Uno game.
@@ -63,6 +66,10 @@ public class GameUnoController {
     private Button unoButton;
     @FXML
     private Label gameStatusLabel;
+    @FXML
+    private ImageView penalizeButtonView;
+    @FXML
+    private Button penalizeButton;
 
     private Player humanPlayer;
     private Player machinePlayer;
@@ -76,10 +83,7 @@ public class GameUnoController {
 
     private ThreadSingUNOMachine threadSingUNOMachine;
     private ThreadPlayMachine threadPlayMachine;
-
-    private Timeline machineUnoTimer;
-    private boolean machineDeclaredUNO;
-
+    private ThreadMonitorMachine threadMonitorMachine;
 
     /**
      * Initializes the controller.
@@ -88,7 +92,6 @@ public class GameUnoController {
     public void initialize() {
         initVariables();
         this.gameUno.startGame();
-        machineDeclaredUNO = false;
         printCardsHumanPlayer();
         printCardsMachinePlayer();
         colorTxtField.setEditable(false);
@@ -104,16 +107,25 @@ public class GameUnoController {
         // Actualizar visualmente la mano de la máquina
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
+        threadMonitorMachine = new ThreadMonitorMachine(this.machinePlayer);
         t.start();
         threadPlayMachine = new ThreadPlayMachine(this.table, this.machinePlayer, this.humanPlayer, this.tableImageView, this.gameUno, this.rules);
+
         threadPlayMachine.start();
         threadPlayMachine.setOnMachinePlayedCallback(this::runUpdateMachinePlay);
         threadPlayMachine.setOnCardEatenCallback(this::runUpdateMachineAte);
         threadPlayMachine.setOnEatCardPlacedCallback(this::runAnimationAndUpdate);
         threadPlayMachine.setOnColorChangedByMachineCallback(this::writeOnColorInfo);
 
+        threadMonitorMachine.start();
+        threadMonitorMachine.setOnMachineHasOneCardCallback(this::showPenalizeButton);
+        threadMonitorMachine.setOnMachineSaidUnoCallback(this::hidePenalizeButton);
+
+        threadSingUNOMachine.setOnUnoSang(this::penalizeHumanUNO);
+
         writeOnColorInfo();
         writeOnTurnInfo();
+        hidePenalizeButton();
 
 
 
@@ -121,6 +133,8 @@ public class GameUnoController {
 
     private void runAnimationAndUpdate(){
         printCardsHumanPlayer();
+        printCardsMachinePlayer();
+        printCardsMachinePlayer();
         animateDrawedCards();
     }
 
@@ -135,6 +149,7 @@ public class GameUnoController {
         printCardsMachinePlayer();
         writeOnTurnInfo();
         writeOnColorInfo();
+        checkGameEnd();
     }
 
     private void writeOnColorInfo(){
@@ -421,6 +436,11 @@ public class GameUnoController {
             return; // Si ya jugó, no permitir que robe más cartas.
         }
 
+        if(unoButton.isVisible()){
+            System.out.println("TIENES QUE CANTAR UNO!!!");
+            return;
+        }
+
         // Verificar si el jugador tiene cartas válidas para jugar
         if (hasValidCardToPlay()) {
             System.out.println("Tienes cartas válidas para jugar, debes jugar una carta.");
@@ -475,20 +495,8 @@ public class GameUnoController {
     private void checkUNO() {
         if (humanPlayer.getCardsPlayer().size() == 1) {
             unoButton.setVisible(true);
-            startHumanUnoTimer();
         }
     }
-
-
-    private void penalizeUNO() {
-        // Verifica si el botón aún está visible (no presionado)
-        if (unoButton.isVisible()) {
-            gameUno.eatCard(humanPlayer, 1); // Hace que el jugador robe una carta
-            unoButton.setVisible(false);    // Oculta el botón después de la penalización
-            System.out.println("El jugador no declaró UNO a tiempo. Penalizado con una carta.");
-        }
-    }
-
 
     @FXML
     public void onHandleUno(ActionEvent event) {
@@ -498,78 +506,107 @@ public class GameUnoController {
         }
     }
 
-    /**
-     * Verifica
-
-    /**
-     * Temporizador para penalizar al jugador humano si no declara UNO a tiempo.
-     */
-    private void startHumanUnoTimer() {
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(4), event -> penalizeHumanUNO()));
-        timeline.setCycleCount(1);
-        timeline.play();
-    }
 
     private void penalizeHumanUNO() {
-        if (unoButton.isVisible()) {
+        if(unoButton.isVisible()){
             gameUno.eatCard(humanPlayer, 2); // Penalización con 2 cartas
+            printCardsHumanPlayer();
             unoButton.setVisible(false);
             System.out.println("No declaraste UNO a tiempo. Penalizado con 2 cartas.");
         }
-    }
 
-    /**
-     * Verifica si la máquina debe declarar UNO y simula su reacción.
-     */
-    private void checkMachineUNO() {
-        if (machinePlayer.getCardsPlayer().size() == 1) {
-            machineDeclaredUNO = false;
-            startMachineUnoTimer();
-        }
-    }
-
-    /**
-     * Temporizador para simular el tiempo de reacción de la máquina al declarar UNO.
-     */
-    private void startMachineUnoTimer() {
-        machineUnoTimer = new Timeline(new KeyFrame(Duration.seconds(randomTimeBetween(2, 4)), event -> {
-            if (!machineDeclaredUNO) {
-                penalizeMachineUNO();
-            }
-        }));
-        machineUnoTimer.setCycleCount(1);
-        machineUnoTimer.play();
-    }
-
-    @FXML
-    public void onPlayerPenalizeMachine(ActionEvent event) {
-        if (!machineDeclaredUNO && machinePlayer.getCardsPlayer().size() == 1) {
-            gameUno.eatCard(machinePlayer, 2); // Penalización con 2 cartas
-            machineUnoTimer.stop();
-        }
     }
 
     private void penalizeMachineUNO() {
         gameUno.eatCard(machinePlayer, 2); // Penalización con 2 cartas
+        printCardsMachinePlayer();
         System.out.println("La máquina no declaró UNO a tiempo. Penalizada con 2 cartas.");
     }
 
-    /**
-     * Genera un tiempo aleatorio entre min y max segundos.
-     */
-    private double randomTimeBetween(int min, int max) {
-        return min + Math.random() * (max - min);
-    }
 
     /**
      * Verifica si el jugador humano o la máquina han ganado la partida.
      */
     private void checkGameEnd() {
         if (humanPlayer.getCardsPlayer().isEmpty()) {
+            killThreads();
             gameStatusLabel.setText("¡GANASTE!");
+            showEndGameAlert("¡Victoria!", "¡Has ganado el juego! 🎉", Alert.AlertType.INFORMATION);
         } else if (machinePlayer.getCardsPlayer().isEmpty()) {
+            killThreads();
             gameStatusLabel.setText("HAS PERDIDO");
+            showEndGameAlert("Derrota", "Lo siento, has perdido el juego. 😞", Alert.AlertType.ERROR);
+            killThreads();
         }
+    }
+
+    private void showEndGameAlert(String title, String content, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null); // No queremos un encabezado
+        alert.setContentText(content);
+
+        // Botones personalizados para la alerta
+        ButtonType closeButton = new ButtonType("Cerrar");
+        ButtonType replayButton = new ButtonType("Volver a jugar");
+
+        alert.getButtonTypes().setAll(replayButton, closeButton);
+
+        // Mostrar y esperar la acción del usuario
+        alert.showAndWait().ifPresent(response -> {
+            if (response == replayButton) {
+                restartGame();
+            } else {
+                Platform.exit(); // Salir de la aplicación
+            }
+        });
+    }
+
+    private void restartGame() {
+        try {
+            // Cerrar la instancia actual
+            GameUnoStage.deleteInstance();
+
+            // Crear una nueva instancia del juego
+            GameUnoStage.getInstance();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Mostrar una alerta si ocurre un error
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Error");
+            errorAlert.setHeaderText("No se pudo reiniciar el juego");
+            errorAlert.setContentText("Ocurrió un problema al intentar reiniciar el juego.");
+            errorAlert.showAndWait();
+        }
+    }
+
+
+    public void showPenalizeButton(){
+        penalizeButton.setVisible(true);
+        penalizeButtonView.setOpacity(1);
+    }
+
+    public void hidePenalizeButton(){
+        penalizeButtonView.setOpacity(0);
+        penalizeButton.setVisible(false);
+    }
+
+    public void handlePenalizeMachine(ActionEvent actionEvent) {
+        if(!threadMonitorMachine.didMachineSayUno){
+            penalizeMachineUNO();
+            hidePenalizeButton();
+        }
+    }
+
+    public void killThreads(){
+        threadMonitorMachine.stopMonitoring();
+        threadPlayMachine.stopMachinePlay();
+        threadSingUNOMachine.stopMonitoringUnoSang();
+    }
+
+    public void handleExitGame(MouseEvent mouseEvent) {
+        killThreads();
+        GameUnoStage.deleteInstance();
     }
 }
 

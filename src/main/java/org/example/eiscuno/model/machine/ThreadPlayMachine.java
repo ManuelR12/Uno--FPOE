@@ -24,6 +24,7 @@ public class ThreadPlayMachine extends Thread {
     private Runnable onColorChangedByMachineCallback;
     private ArrayList<String> colorsToPick = new ArrayList<>();
     private cardRules rules;
+    private boolean isGameActive = true;
 
     public ThreadPlayMachine(Table table, Player machinePlayer, Player humanPlayer, ImageView tableImageView, GameUno gameUno, cardRules rules) {
         this.table = table;
@@ -60,13 +61,17 @@ public class ThreadPlayMachine extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (isGameActive) {
             if (hasPlayerPlayed) {
                 simulateMachineTurn();
             }
 
             sleepForCpuEfficiency();
         }
+    }
+
+    public void stopMachinePlay(){
+        isGameActive = false;
     }
 
     private void simulateMachineTurn() {
@@ -116,7 +121,6 @@ public class ThreadPlayMachine extends Thread {
         if (index == -1) {
             System.out.println("La máquina pasa");
             hasPlayerPlayed = false;
-            return;
         }
     }
 
@@ -166,6 +170,8 @@ public class ThreadPlayMachine extends Thread {
         System.out.println("MachinePlayer played a special card!: " + card.getValue());
         if (card.getValue().equals("+2") && onEatCardPlacedCallback != null) {
             Platform.runLater(onEatCardPlacedCallback);
+        } else if(card.getValue().equals("REVERSE") && onMachinePlayedCallback != null || card.getValue().equals("SKIP") && onMachinePlayedCallback != null) {
+            Platform.runLater(onMachinePlayedCallback);
         }
 
         sleepForEffectDelay();
