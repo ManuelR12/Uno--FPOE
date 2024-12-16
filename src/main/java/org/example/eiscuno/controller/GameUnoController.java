@@ -127,8 +127,35 @@ public class GameUnoController {
         writeOnTurnInfo();
         hidePenalizeButton();
 
+    }
 
+    /**
+     * Initializes the variables for the game.
+     */
+    private void initVariables() {
+        this.humanPlayer = new Player("HUMAN_PLAYER");
+        this.machinePlayer = new Player("MACHINE_PLAYER");
+        this.deck = new Deck();
+        this.table = new Table();
+        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
+        this.posInitCardToShow = 0;
+        this.animations = new GameStageAnimations();
+        rules = new cardRules(gameUno);
+    }
 
+    private void animateDrawedCards() {
+        Card actualCard = table.getCurrentCardOnTheTable();
+        if (actualCard.getValue().equals("+4")) {
+            drawNumber.setText("+4");
+        } else if (actualCard.getValue().equals("+2")) {
+            drawNumber.setText("+2");
+        }
+
+        SequentialTransition sequentialTransition = new SequentialTransition(
+                animations.fadeIn(cardsDrawedPane, 1), animations.fadeOut(cardsDrawedPane, 1)
+        );
+
+        sequentialTransition.play();
     }
 
     private void runAnimationAndUpdate(){
@@ -163,19 +190,6 @@ public class GameUnoController {
             turnTxtField.setText("Human");
         }
 
-    }
-    /**
-     * Initializes the variables for the game.
-     */
-    private void initVariables() {
-        this.humanPlayer = new Player("HUMAN_PLAYER");
-        this.machinePlayer = new Player("MACHINE_PLAYER");
-        this.deck = new Deck();
-        this.table = new Table();
-        this.gameUno = new GameUno(this.humanPlayer, this.machinePlayer, this.deck, this.table);
-        this.posInitCardToShow = 0;
-        this.animations = new GameStageAnimations();
-        rules = new cardRules(gameUno);
     }
 
 
@@ -298,6 +312,13 @@ public class GameUnoController {
         });
     }
 
+    public class InvalidMoveException extends Exception {
+        public InvalidMoveException(String message) {
+            super(message);
+        }
+    }
+
+
     private void handleColorPick(Card card) {
         if (selectedColor == null) {
             System.out.println("No se ha seleccionado un color.");
@@ -350,21 +371,6 @@ public class GameUnoController {
         }
     }
 
-    private void animateDrawedCards() {
-        Card actualCard = table.getCurrentCardOnTheTable();
-        if (actualCard.getValue().equals("+4")) {
-            drawNumber.setText("+4");
-        } else if (actualCard.getValue().equals("+2")) {
-            drawNumber.setText("+2");
-        }
-
-        SequentialTransition sequentialTransition = new SequentialTransition(
-                animations.fadeIn(cardsDrawedPane, 1), animations.fadeOut(cardsDrawedPane, 1)
-        );
-
-        sequentialTransition.play();
-    }
-
     private Integer findPosCardsHumanPlayer(Card card) {
         for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {
             if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {
@@ -395,20 +401,22 @@ public class GameUnoController {
         }
     }
 
-    private boolean hasValidCardToPlay() {
+    private boolean hasValidCardToPlay() throws InvalidMoveException {
         // Obtener la última carta en la mesa
         Card currentCardOnTable = this.table.getCurrentCardOnTheTable();
 
         // Verificar si el jugador tiene alguna carta válida
         for (Card card : this.humanPlayer.getCardsPlayer()) {
-            if (card.getColor().equals(currentCardOnTable.getColor())||
+            if (card.getColor().equals(currentCardOnTable.getColor()) ||
                     card.getValue().equals(currentCardOnTable.getValue()) ||
                     "WILD".equals(card.getColor())) {
                 return true;  // El jugador tiene una carta válida para jugar
             }
         }
-        return false;  // El jugador no tiene cartas válidas para jugar
+        // Lanzar la excepción si no hay carta válida para jugar
+        throw new InvalidMoveException("No tienes cartas válidas para jugar.");
     }
+
 
     private void debugCardInfo(Card card) {
         if (card != null) {
@@ -441,14 +449,17 @@ public class GameUnoController {
             return;
         }
 
-        // Verificar si el jugador tiene cartas válidas para jugar
-        if (hasValidCardToPlay()) {
-            System.out.println("Tienes cartas válidas para jugar, debes jugar una carta.");
-            return;  // Si tiene cartas válidas, no permite robar más cartas
-        }
+        try {
+            // Verificar si el jugador tiene cartas válidas para jugar
+            if (hasValidCardToPlay()) {
+                System.out.println("Tienes cartas válidas para jugar, debes jugar una carta.");
+                return;  // Si tiene cartas válidas, no permite robar más cartas
+            }
+        } catch (InvalidMoveException e) {
+            takeCardAndPrint();
 
-        // El jugador roba una carta si no tiene cartas válidas
-        takeCardAndPrint();
+            // Manejar la excepción si el jugador no tiene cartas válidas
+        }
 
         // Verificar si la última carta del jugador es válida para jugar
         if (isLastCardPlayable()) {
@@ -458,6 +469,7 @@ public class GameUnoController {
             skipTurn();
         }
     }
+
 
     private boolean isPlayerTurnOver() {
         if (threadPlayMachine.getHasPlayerPlayed()) {
@@ -530,12 +542,12 @@ public class GameUnoController {
     private void checkGameEnd() {
         if (humanPlayer.getCardsPlayer().isEmpty()) {
             killThreads();
-            gameStatusLabel.setText("¡GANASTE!");
-            showEndGameAlert("¡Victoria!", "¡Has ganado el juego! 🎉", Alert.AlertType.INFORMATION);
+            gameStatusLabel.setText("¡YOU WON!");
+            showEndGameAlert("¡Victory!", "¡You won the UNO game! 🎉", Alert.AlertType.INFORMATION);
         } else if (machinePlayer.getCardsPlayer().isEmpty()) {
             killThreads();
-            gameStatusLabel.setText("HAS PERDIDO");
-            showEndGameAlert("Derrota", "Lo siento, has perdido el juego. 😞", Alert.AlertType.ERROR);
+            gameStatusLabel.setText("YOU LOST");
+            showEndGameAlert("Defeat", "I'm sorry, you've lost the game. 😞", Alert.AlertType.ERROR);
             killThreads();
         }
     }
@@ -547,8 +559,8 @@ public class GameUnoController {
         alert.setContentText(content);
 
         // Botones personalizados para la alerta
-        ButtonType closeButton = new ButtonType("Cerrar");
-        ButtonType replayButton = new ButtonType("Volver a jugar");
+        ButtonType closeButton = new ButtonType("Close");
+        ButtonType replayButton = new ButtonType("Play again");
 
         alert.getButtonTypes().setAll(replayButton, closeButton);
 
