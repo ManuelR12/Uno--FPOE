@@ -17,6 +17,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="526.0" prefWidth="832.0" style="-fx-background-color: orange;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.eiscuno.controller.GameUnoController">
@@ -30,8 +31,8 @@
    <right>
       <Pane prefHeight="318.0" prefWidth="207.0" BorderPane.alignment="CENTER">
          <children>
-            <Button layoutX="7.0" layoutY="53.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="98.0" prefWidth="121.0" style="-fx-background-color: transpatent;" />
-            <ImageView fitHeight="112.0" fitWidth="125.0" layoutX="-4.0" layoutY="55.0" pickOnBounds="true" preserveRatio="true">
+            <Button fx:id="unoButton" layoutX="7.0" layoutY="53.0" mnemonicParsing="false" onAction="#onHandleUno" prefHeight="98.0" prefWidth="121.0" style="-fx-background-color: transpatent;" visible="false" />
+            <ImageView fitHeight="112.0" fitWidth="125.0" layoutX="5.0" layoutY="55.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@images/button_uno.png" />
                </image>
@@ -39,7 +40,7 @@
                   <DropShadow />
                </effect>
             </ImageView>
-            <Label layoutX="14.0" layoutY="175.0" text="ACTUAL COLOR:" textFill="RED">
+            <Label layoutX="10.0" layoutY="159.0" text=" ACTUAL COLOR:" textFill="RED">
                <font>
                   <Font name="Impact" size="15.0" />
                </font>
@@ -51,7 +52,7 @@
                   </Bloom>
                </effect>
             </Label>
-            <Label layoutX="14.0" layoutY="203.0" text="ACTUAL TURN:" textFill="RED">
+            <Label layoutX="13.0" layoutY="203.0" text="ACTUAL TURN:" textFill="RED">
                <font>
                   <Font name="Impact" size="15.0" />
                </font>
@@ -63,37 +64,32 @@
                   </Bloom>
                </effect>
             </Label>
-            <TextField fx:id="colorTxtField" layoutX="105.0" layoutY="171.0" prefHeight="25.0" prefWidth="69.0">
+            <TextField fx:id="turnTxtField" alignment="CENTER" layoutX="105.0" layoutY="199.0" prefHeight="28.0" prefWidth="86.0">
                <font>
-                  <Font name="Onyx" size="15.0" />
-               </font>
-            </TextField>
-            <TextField fx:id="turnTxtField" layoutX="105.0" layoutY="199.0" prefHeight="25.0" prefWidth="69.0">
-               <font>
-                  <Font name="Onyx" size="15.0" />
+                  <Font name="Impact" size="15.0" />
                </font>
             </TextField>
             <AnchorPane fx:id="cardsDrawedPane" layoutX="-21.0" layoutY="212.0" prefHeight="45.0" prefWidth="0.0">
                <children>
-                  <Label fx:id="drawNumber" layoutX="77.0" layoutY="12.0" textFill="#ada4ff">
+                  <Label fx:id="drawNumber" alignment="CENTER" layoutX="79.0" layoutY="15.0" prefHeight="35.0" prefWidth="42.0" textFill="WHITE">
                      <font>
-                        <Font name="Onyx" size="24.0" />
+                        <Font name="Onyx" size="31.0" />
                      </font>
                      <effect>
                         <Bloom />
                      </effect>
                   </Label>
-                  <Label fx:id="cardsLabel" layoutX="101.0" layoutY="12.0" text="cards!" textFill="#ada4ff">
+                  <Label fx:id="cardsLabel" layoutX="121.0" layoutY="15.0" text="cards!" textFill="WHITE">
                      <font>
-                        <Font name="Onyx" size="24.0" />
+                        <Font name="Onyx" size="31.0" />
                      </font>
                      <effect>
                         <Bloom />
                      </effect>
                   </Label>
-                  <Label fx:id="drawLabel" layoutX="42.0" layoutY="12.0" text="Draw" textFill="#ada4ff">
+                  <Label fx:id="drawLabel" layoutX="39.0" layoutY="15.0" text="Draw" textFill="WHITE">
                      <font>
-                        <Font name="Onyx" size="24.0" />
+                        <Font name="Onyx" size="31.0" />
                      </font>
                      <effect>
                         <Bloom />
@@ -101,6 +97,21 @@
                   </Label>
                </children>
             </AnchorPane>
+            <Label fx:id="gameStatusLabel" contentDisplay="CENTER" layoutX="11.0" layoutY="-6.0" prefHeight="41.0" prefWidth="176.0" textAlignment="CENTER" textFill="RED">
+               <font>
+                  <Font name="Impact" size="22.0" />
+               </font>
+               <effect>
+                  <Bloom />
+               </effect>
+            </Label>
+            <ImageView fx:id="penalizeButtonView" fitHeight="76.0" fitWidth="66.0" layoutX="141.0" layoutY="26.0" mouseTransparent="true">
+               <image>
+                  <Image url="@images/alert_button.png" />
+               </image>
+            </ImageView>
+            <Button fx:id="penalizeButton" layoutX="147.0" layoutY="31.0" mnemonicParsing="false" onAction="#handlePenalizeMachine" prefHeight="70.0" prefWidth="56.0" style="-fx-background-color: transparent;" textFill="TRANSPARENT" />
+            <Circle fx:id="colorCircle" fill="#f0f3f7" layoutX="127.0" layoutY="168.0" radius="17.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
          </children>
       </Pane>
    </right>
@@ -129,7 +140,6 @@
                      </effect></Button>
                </children>
             </AnchorPane>
-            <AnchorPane layoutX="13.0" layoutY="-86.0" prefHeight="200.0" prefWidth="200.0" />
          </children>
       </Pane>
    </center>
@@ -162,7 +172,7 @@
                <HBox.margin>
                   <Insets />
                </HBox.margin></Button>
-            <ImageView fitHeight="53.0" fitWidth="46.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="53.0" fitWidth="46.0" onMouseClicked="#handleExitGame" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@images/go-out.png" />
                </image>

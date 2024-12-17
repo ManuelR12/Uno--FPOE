@@ -7,24 +7,30 @@ import org.example.eiscuno.view.GameUnoStage;
 import java.io.IOException;
 
 /**
- * The main class of the EISC Uno application.
+ * Main class for the EISC Uno application.
+ *
+ * <p>Initializes and launches the JavaFX application.
+ *
+ * @author Juan Pablo Charry Ramirez
+ * @author Juan Manuel Rodriguez
+ * @author Stefania Bolaños Perdomo
  */
 public class Main extends Application {
 
     /**
-     * The main method of the application.
+     * Entry point of the application.
      *
-     * @param args the command line arguments
+     * @param args command line arguments
      */
     public static void main(String[] args) {
         launch(args);
     }
 
     /**
-     * Starts the application.
+     * Starts the primary stage of the application.
      *
-     * @param primaryStage the primary stage of the application
-     * @throws IOException if an error occurs while loading the stage
+     * @param primaryStage the main stage
+     * @throws IOException if an error occurs during initialization
      */
     @Override
     public void start(Stage primaryStage) throws IOException {

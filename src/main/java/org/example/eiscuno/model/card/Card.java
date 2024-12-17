@@ -5,6 +5,9 @@ import javafx.scene.image.ImageView;
 
 /**
  * Represents a card in the Uno game.
+ *
+ * <p>Each card has an image, a value, and a color, and it can be visually represented
+ * using an {@link ImageView}.
  */
 public class Card {
     private String url;
@@ -14,10 +17,11 @@ public class Card {
     private ImageView cardImageView;
 
     /**
-     * Constructs a Card with the specified image URL and name.
+     * Constructs a Card with the specified image URL, value, and color.
      *
-     * @param url the URL of the card image
-     * @param value of the card
+     * @param url   the URL of the card image
+     * @param value the value of the card (e.g., number or special action)
+     * @param color the color of the card (e.g., red, blue, green, yellow)
      */
     public Card(String url, String value, String color) {
         this.url = url;
@@ -58,14 +62,29 @@ public class Card {
         return image;
     }
 
+    /**
+     * Gets the value of the card.
+     *
+     * @return the value of the card
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Gets the color of the card.
+     *
+     * @return the color of the card
+     */
     public String getColor() {
         return color;
     }
 
+    /**
+     * Sets the color of the card.
+     *
+     * @param color the new color of the card
+     */
     public void setColor(String color) {
         this.color = color;
     }

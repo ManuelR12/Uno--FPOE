@@ -3,13 +3,16 @@ package org.example.eiscuno.view;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 /**
  * Represents the main stage of the Uno game application.
- * This stage displays the game interface to the user.
+ *
+ * <p>This class initializes and displays the main game interface using a singleton pattern
+ * to ensure only one instance of the game stage exists.
  */
 public class GameUnoStage extends Stage {
 
@@ -32,12 +35,19 @@ public class GameUnoStage extends Stage {
         setTitle("UNO"); // Sets the title of the stage
         setScene(scene); // Sets the scene for the stage
         setResizable(false); // Disallows resizing of the stage
+
+        try {
+            this.getIcons().add(new Image(getClass().getResourceAsStream("/org/example/eiscuno/images/uno.png")));
+        } catch (NullPointerException e) {
+            System.err.println("Icon image not found: " + e.getMessage());
+        }
         show(); // Displays the stage
     }
 
     /**
      * Closes the instance of GameUnoStage.
-     * This method is used to clean up resources when the game stage is no longer needed.
+     *
+     * <p>This method is used to clean up resources when the game stage is no longer needed.
      */
     public static void deleteInstance() {
         GameUnoStageHolder.INSTANCE.close();
@@ -58,7 +68,8 @@ public class GameUnoStage extends Stage {
 
     /**
      * Holder class for the singleton instance of GameUnoStage.
-     * This class ensures lazy initialization of the singleton instance.
+     *
+     * <p>This class ensures lazy initialization of the singleton instance.
      */
     private static class GameUnoStageHolder {
         private static GameUnoStage INSTANCE;

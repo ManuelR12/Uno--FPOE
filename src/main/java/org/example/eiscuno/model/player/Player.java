@@ -6,6 +6,10 @@ import java.util.ArrayList;
 
 /**
  * Represents a player in the Uno game.
+ *
+ * <p>This class implements the {@link IPlayer} interface and manages the player's hand
+ * of cards, including adding, removing, and retrieving cards. Each player is identified
+ * by a specific type.
  */
 public class Player implements IPlayer {
     private ArrayList<Card> cardsPlayer;
@@ -13,6 +17,8 @@ public class Player implements IPlayer {
 
     /**
      * Constructs a new Player object with an empty hand of cards.
+     *
+     * @param typePlayer the type of the player (e.g., human or machine)
      */
     public Player(String typePlayer){
         this.cardsPlayer = new ArrayList<Card>();
@@ -22,7 +28,7 @@ public class Player implements IPlayer {
     /**
      * Adds a card to the player's hand.
      *
-     * @param card The card to be added to the player's hand.
+     * @param card the card to be added to the player's hand
      */
     @Override
     public void addCard(Card card){
@@ -32,7 +38,7 @@ public class Player implements IPlayer {
     /**
      * Retrieves all cards currently held by the player.
      *
-     * @return An ArrayList containing all cards in the player's hand.
+     * @return an {@link ArrayList} containing all cards in the player's hand
      */
     @Override
     public ArrayList<Card> getCardsPlayer() {
@@ -42,7 +48,7 @@ public class Player implements IPlayer {
     /**
      * Removes a card from the player's hand based on its index.
      *
-     * @param index The index of the card to remove.
+     * @param index the index of the card to remove
      */
     @Override
     public void removeCard(int index) {
@@ -52,14 +58,19 @@ public class Player implements IPlayer {
     /**
      * Retrieves a card from the player's hand based on its index.
      *
-     * @param index The index of the card to retrieve.
-     * @return The card at the specified index in the player's hand.
+     * @param index the index of the card to retrieve
+     * @return the card at the specified index in the player's hand
      */
     @Override
     public Card getCard(int index){
         return cardsPlayer.get(index);
     }
 
+    /**
+     * Retrieves the type of the player.
+     *
+     * @return a string representing the player's type (e.g., human or machine)
+     */
     public String getTypePlayer() {
         return typePlayer;
     }
