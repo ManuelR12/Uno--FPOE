@@ -144,7 +144,6 @@ public class GameUnoController {
         rules = new cardRules(gameUno);
     }
 
-
     /**
      * Animates the cards drawn effect for special cards like +2 and +4.
      */
@@ -163,7 +162,6 @@ public class GameUnoController {
         sequentialTransition.play();
     }
 
-
     /**
      * Updates UI after animations and machine actions.
      */
@@ -172,7 +170,6 @@ public class GameUnoController {
         printCardsMachinePlayer();
         animateDrawedCards();
     }
-
 
     /**
      * Updates UI after the machine plays a card.
@@ -194,7 +191,6 @@ public class GameUnoController {
         checkGameEnd();
     }
 
-
     /**
      * Updates the color display field with the current card color.
      */
@@ -212,7 +208,6 @@ public class GameUnoController {
             turnTxtField.setText("Human");
         }
     }
-
 
     /**
      * Displays the human player's cards on the grid pane.
@@ -278,7 +273,7 @@ public class GameUnoController {
         } else {
             playRegularCard(card);
         }
-        checkGameEnd();
+       checkGameEnd();
     }
 
     /**
@@ -324,7 +319,6 @@ public class GameUnoController {
         handleSpecialCardEffects(card);
     }
 
-
     /**
      * Handles the special effects of cards like REVERSE, SKIP, and +2.
      *
@@ -344,7 +338,6 @@ public class GameUnoController {
             writeOnTurnInfo();
         }
     }
-
 
     /**
      * Opens the color picker when a wild card is played.
@@ -372,7 +365,6 @@ public class GameUnoController {
         });
     }
 
-
     /**
      * Exception thrown when an invalid move is attempted.
      */
@@ -386,7 +378,6 @@ public class GameUnoController {
             super(message);
         }
     }
-
 
     /**
      * Handles the color selection for wild cards.
@@ -610,7 +601,6 @@ public class GameUnoController {
                 "WILD".equals(lastCard.getColor()) || "WILD".equals(lastCard.getValue());
     }
 
-
     /**
      * Skips the player's turn if they cannot play a valid card.
      */
@@ -640,7 +630,6 @@ public class GameUnoController {
             System.out.println("Declaraste UNO correctamente.");
         }
     }
-
 
     /**
      * Penalizes the human player if they fail to declare UNO on time.
@@ -687,26 +676,29 @@ public class GameUnoController {
      * @param alertType the type of alert (e.g., INFORMATION, ERROR)
      */
     private void showEndGameAlert(String title, String content, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null); // No header text
-        alert.setContentText(content);
+        Platform.runLater(() -> {
+            Alert alert = new Alert(alertType);
+            alert.setTitle(title);
+            alert.setHeaderText(null); // No header text
+            alert.setContentText(content);
 
-        // Custom buttons for the alert
-        ButtonType closeButton = new ButtonType("Close");
-        ButtonType replayButton = new ButtonType("Play again");
+            // Custom buttons for the alert
+            ButtonType closeButton = new ButtonType("Exit");
+            ButtonType replayButton = new ButtonType("Play again!");
 
-        alert.getButtonTypes().setAll(replayButton, closeButton);
+            alert.getButtonTypes().setAll(replayButton, closeButton);
 
-        // Show and handle user response
-        alert.showAndWait().ifPresent(response -> {
-            if (response == replayButton) {
-                restartGame();
-            } else {
-                Platform.exit(); // Exit the application
-            }
+            // Show and handle user response
+            alert.showAndWait().ifPresent(response -> {
+                if (response == replayButton) {
+                    restartGame();
+                } else {
+                    Platform.exit(); // Exit the application
+                }
+            });
         });
     }
+
 
     /**
      * Restarts the game by closing the current instance and creating a new one.
@@ -725,7 +717,6 @@ public class GameUnoController {
         }
     }
 
-
     /**
      * Displays the penalize button when the machine has one card left.
      */
@@ -733,7 +724,6 @@ public class GameUnoController {
         penalizeButton.setVisible(true);
         penalizeButtonView.setOpacity(1);
     }
-
 
     /**
      * Hides the penalize button when the machine has declared UNO.
@@ -755,7 +745,6 @@ public class GameUnoController {
         }
     }
 
-
     /**
      * Stops all active game threads to clean up resources.
      */
@@ -775,5 +764,3 @@ public class GameUnoController {
         GameUnoStage.deleteInstance();
     }
 }
-
-
