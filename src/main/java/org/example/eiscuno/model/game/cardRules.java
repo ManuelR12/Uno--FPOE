@@ -31,10 +31,7 @@ public class cardRules {
      */
     public void applySpecialCardEffect(Card card, Player nextPlayer) {
         switch (card.getValue()) {
-            case "REVERSE":
-                applyReverseOrSkip(nextPlayer);
-                break;
-            case "SKIP":
+            case "REVERSE", "SKIP":
                 applyReverseOrSkip(nextPlayer);
                 break;
             case "+2":

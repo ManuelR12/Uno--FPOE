@@ -1,9 +1,6 @@
 package org.example.eiscuno.controller;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,9 +11,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-import org.example.eiscuno.model.Animations.AnimationAdapter;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import org.example.eiscuno.model.Animations.GameStageAnimations;
 import org.example.eiscuno.model.card.Card;
 import org.example.eiscuno.model.deck.Deck;
@@ -28,7 +24,6 @@ import org.example.eiscuno.model.machine.ThreadSingUNOMachine;
 import org.example.eiscuno.model.player.Player;
 import org.example.eiscuno.model.table.Table;
 import org.example.eiscuno.view.GameUnoStage;
-
 import java.io.IOException;
 
 /**
@@ -60,7 +55,7 @@ public class GameUnoController {
     @FXML
     private AnchorPane cardsDrawedPane;
     @FXML
-    private TextField colorTxtField;
+    private Circle colorCircle;
     @FXML
     private TextField turnTxtField;
     @FXML
@@ -98,7 +93,6 @@ public class GameUnoController {
         this.gameUno.startGame();
         printCardsHumanPlayer();
         printCardsMachinePlayer();
-        colorTxtField.setEditable(false);
         turnTxtField.setEditable(false);
 
         rules = new cardRules(gameUno);
@@ -192,10 +186,23 @@ public class GameUnoController {
     }
 
     /**
-     * Updates the color display field with the current card color.
+     * Updates the color display circle with the current card color.
      */
     private void writeOnColorInfo(){
-        colorTxtField.setText(table.getCurrentCardOnTheTable().getColor());
+        switch (table.getCurrentCardOnTheTable().getColor()){
+            case("RED"):
+                colorCircle.setFill(Color.web( "#fa070c"));
+                break;
+            case("BLUE"):
+                colorCircle.setFill(Color.web(("#4290f5")));
+                break;
+            case("YELLOW"):
+                colorCircle.setFill(Color.web("#fac907"));
+                break;
+            case("GREEN"):
+                colorCircle.setFill(Color.web(("#58cf25")));
+                break;
+        }
     }
 
     /**
@@ -419,7 +426,6 @@ public class GameUnoController {
         }
     }
 
-
     /**
      * Displays the machine player's cards as back-facing cards on the grid pane.
      */
@@ -460,7 +466,6 @@ public class GameUnoController {
         }
         return -1;
     }
-
 
     /**
      * Handles the "Back" button action to navigate to the previous set of cards.
@@ -509,7 +514,6 @@ public class GameUnoController {
         // Throw an exception if no valid card is available
         throw new InvalidMoveException("No tienes cartas válidas para jugar.");
     }
-
 
     /**
      * Prints debugging information about a selected card.
