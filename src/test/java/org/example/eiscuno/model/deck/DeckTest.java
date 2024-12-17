@@ -7,6 +7,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test class for the {@link Deck} class.
+ *
+ * <p>Contains unit tests to verify the functionality of the Deck class, including
+ * card retrieval, initialization, and the deck's empty state validation.
+ */
 class DeckTest {
     private final Deck deck = new Deck();
 
@@ -21,7 +27,9 @@ class DeckTest {
     }
 
     /**
-     * Test to verify that taking a card returns a valid Card object with a non-null value.
+     * Tests that taking a card from the deck returns a valid {@link Card} object.
+     *
+     * <p>The card should have a non-null and non-empty value.
      */
     @Test
     void testTakeCard() {
@@ -33,7 +41,9 @@ class DeckTest {
     }
 
     /**
-     * Test to verify that the initial card value is between 1 and 10 when taking a card for initialization.
+     * Tests that the initial card taken for game setup has a value between 0 and 9.
+     *
+     * <p>This verifies that the initial card is a numeric card.
      */
     @Test
     void testTakeCardInit() {
@@ -47,7 +57,8 @@ class DeckTest {
     }
 
     /**
-     * Test to verify that the deck's isEmpty method returns the correct boolean state.
+     * Tests the {@link Deck#isEmpty()} method to ensure it correctly indicates
+     * whether the deck contains cards.
      */
     @Test
     void testIsEmpty() {

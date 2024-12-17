@@ -8,6 +8,9 @@ import java.util.Stack;
 
 /**
  * Represents a deck of Uno cards.
+ *
+ * <p>This class manages the initialization, shuffling, and drawing of cards
+ * for the Uno game. It uses a {@link Stack} to simulate a deck of cards.
  */
 public class Deck {
     private Stack<Card> deckOfCards;
@@ -22,6 +25,9 @@ public class Deck {
 
     /**
      * Initializes the deck with cards based on the EISCUnoEnum values.
+     *
+     * <p>Only valid Uno cards (e.g., color cards, special cards, and wild cards)
+     * are added to the deck.
      */
     private void initializeDeck() {
         for (EISCUnoEnum cardEnum : EISCUnoEnum.values()) {
@@ -42,6 +48,12 @@ public class Deck {
         Collections.shuffle(deckOfCards);
     }
 
+    /**
+     * Determines the value of a card based on its name.
+     *
+     * @param name the name of the card
+     * @return the value of the card as a string
+     */
     private String getCardValue(String name) {
         if (name.endsWith("0")){
             return "0";
@@ -77,9 +89,14 @@ public class Deck {
         else {
             return null;
         }
-
     }
 
+    /**
+     * Determines the color of a card based on its name.
+     *
+     * @param name the name of the card
+     * @return the color of the card as a string
+     */
     private String getCardColor(String name) {
         if (name.contains("GREEN")) {
             return "GREEN";
@@ -109,6 +126,12 @@ public class Deck {
         return deckOfCards.pop();
     }
 
+    /**
+     * Takes a numeric card from the deck to serve as the initial card.
+     *
+     * @return the first numeric card from the deck
+     * @throws IllegalStateException if no numeric cards are available
+     */
     public Card takeCardInit() {
         if (deckOfCards.isEmpty()) {
             throw new IllegalStateException("No hay más cartas en el mazo.");
@@ -149,4 +172,3 @@ public class Deck {
         return deckOfCards.isEmpty();
     }
 }
-

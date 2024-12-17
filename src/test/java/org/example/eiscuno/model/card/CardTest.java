@@ -11,6 +11,12 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test class for the {@link Card} class.
+ *
+ * <p>Contains unit tests to verify the functionality of the Card class,
+ * including its graphical representation, image handling, value, and color management.
+ */
 class CardTest {
     private static final String[] COLORS = {"GREEN", "YELLOW", "BLUE", "RED", "WILD"};
     private final Deck deck = new Deck();
@@ -27,7 +33,7 @@ class CardTest {
     }
 
     /**
-     * Test to verify that the card's graphical representation is an ImageView.
+     * Tests that the card's graphical representation is an instance of {@link ImageView}.
      */
     @Test
     void testGetCard() {
@@ -35,7 +41,7 @@ class CardTest {
     }
 
     /**
-     * Test to verify that the card's image is of type Image.
+     * Tests that the card's image is an instance of {@link Image}.
      */
     @Test
     void testGetImage() {
@@ -43,7 +49,7 @@ class CardTest {
     }
 
     /**
-     * Test to verify the card's value.
+     * Tests that the card's value matches the expected value.
      */
     @Test
     void testGetValue() {
@@ -51,7 +57,7 @@ class CardTest {
     }
 
     /**
-     * Test to verify the card's color.
+     * Tests that the card's color matches the expected color.
      */
     @Test
     void testGetColor() {
@@ -59,7 +65,7 @@ class CardTest {
     }
 
     /**
-     * Test to verify that the card's color can be updated correctly.
+     * Tests that the card's color can be updated correctly using {@link Card#setColor(String)}.
      */
     @Test
     void testSetColor() {
@@ -70,6 +76,8 @@ class CardTest {
 
     /**
      * Returns a random color from the available COLORS array.
+     *
+     * @return a randomly selected color
      */
     private String getRandomColor() {
         Random random = new Random();

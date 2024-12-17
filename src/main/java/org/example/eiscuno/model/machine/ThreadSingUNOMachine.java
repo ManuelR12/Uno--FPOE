@@ -5,28 +5,47 @@ import org.example.eiscuno.model.card.Card;
 
 import java.util.ArrayList;
 
+/**
+ * Monitors the machine player's hand and triggers a callback when the machine shouts "UNO".
+ *
+ * <p>This class continuously checks if the machine player has one card left and executes
+ * a callback after a delay to simulate the machine shouting "UNO".
+ */
 public class ThreadSingUNOMachine implements Runnable {
     private ArrayList<Card> cardsPlayer;
     private Runnable onUnoSangCallBack;
-    private boolean unoPending; // Bandera para evitar múltiples callbacks innecesarios
+    private boolean unoPending; // Flag to prevent multiple unnecessary callbacks
     private boolean isGameActive = true;
 
+    /**
+     * Constructs a ThreadSingUNOMachine instance to monitor the player's hand.
+     *
+     * @param cardsPlayer the list of cards in the machine player's hand
+     */
     public ThreadSingUNOMachine(ArrayList<Card> cardsPlayer) {
         this.cardsPlayer = cardsPlayer;
-        this.unoPending = false; // Inicialmente no hay "UNO" pendiente
+        this.unoPending = false; // Initially, no "UNO" shout is pending
     }
 
+    /**
+     * Sets the callback to be executed when the machine shouts "UNO".
+     *
+     * @param onUnoSangCallBack the callback to execute when "UNO" is triggered
+     */
     public void setOnUnoSang(Runnable onUnoSangCallBack) {
         this.onUnoSangCallBack = onUnoSangCallBack;
     }
 
+    /**
+     * Runs the monitoring loop to check for a single card condition.
+     */
     @Override
     public void run() {
         while (isGameActive) {
             hasOneCardTheHumanPlayer();
 
             try {
-                // Pequeña pausa para evitar consumir demasiados recursos (1ms)
+                // Small pause to reduce resource consumption (1ms)
                 Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -34,33 +53,39 @@ public class ThreadSingUNOMachine implements Runnable {
         }
     }
 
+    /**
+     * Stops monitoring the machine player's hand.
+     */
     public void stopMonitoringUnoSang(){
         isGameActive = false;
     }
 
+    /**
+     * Checks if the machine player has one card left and triggers the "UNO" callback.
+     */
     private void hasOneCardTheHumanPlayer() {
         if (cardsPlayer.size() == 1 && !unoPending) {
-            // Marca como pendiente para evitar múltiples ejecuciones
+            // Set flag to avoid multiple executions
             unoPending = true;
 
-            // Ejecuta el callback después de 3 segundos
+            // Execute the callback after a 3-second delay
             new Thread(() -> {
                 try {
-                    Thread.sleep(3000); // Espera 3 segundos
+                    Thread.sleep(3000); // Wait for 3 seconds
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                // Ejecuta el callback en el hilo de la interfaz gráfica
+                // Execute the callback on the UI thread
                 if (onUnoSangCallBack != null) {
                     Platform.runLater(onUnoSangCallBack);
                 }
 
-                // Permitir nuevos callbacks si el estado cambia
+                // Reset flag to allow future callbacks if the state changes
                 unoPending = false;
             }).start();
         } else if (cardsPlayer.size() != 1) {
-            // Si el jugador ya no tiene una sola carta, reinicia la bandera
+            // Reset the flag if the player no longer has one card
             unoPending = false;
         }
     }

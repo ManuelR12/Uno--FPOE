@@ -7,7 +7,9 @@ import org.example.eiscuno.model.table.Table;
 
 /**
  * Represents a game of Uno.
- * This class manages the game logic and interactions between players, deck, and the table.
+ *
+ * <p>This class manages the game logic, including card distribution, player actions,
+ * and interactions between players, the deck, and the table.
  */
 public class GameUno implements IGameUno {
 
@@ -19,10 +21,10 @@ public class GameUno implements IGameUno {
     /**
      * Constructs a new GameUno instance.
      *
-     * @param humanPlayer   The human player participating in the game.
-     * @param machinePlayer The machine player participating in the game.
-     * @param deck          The deck of cards used in the game.
-     * @param table         The table where cards are placed during the game.
+     * @param humanPlayer   the human player participating in the game
+     * @param machinePlayer the machine player participating in the game
+     * @param deck          the deck of cards used in the game
+     * @param table         the table where cards are placed during the game
      */
     public GameUno(Player humanPlayer, Player machinePlayer, Deck deck, Table table) {
         this.humanPlayer = humanPlayer;
@@ -33,7 +35,9 @@ public class GameUno implements IGameUno {
 
     /**
      * Starts the Uno game by distributing cards to players.
-     * The human player and the machine player each receive 10 cards from the deck.
+     *
+     * <p>Each player receives 10 cards from the deck, with the first half
+     * assigned to the human player and the remaining half to the machine player.
      */
     @Override
     public void startGame() {
@@ -49,8 +53,8 @@ public class GameUno implements IGameUno {
     /**
      * Allows a player to draw a specified number of cards from the deck.
      *
-     * @param player        The player who will draw cards.
-     * @param numberOfCards The number of cards to draw.
+     * @param player        the player who will draw cards
+     * @param numberOfCards the number of cards to draw
      */
     @Override
     public void eatCard(Player player, int numberOfCards) {
@@ -62,7 +66,7 @@ public class GameUno implements IGameUno {
     /**
      * Places a card on the table during the game.
      *
-     * @param card The card to be placed on the table.
+     * @param card the card to be placed on the table
      */
     @Override
     public void playCard(Card card) {
@@ -72,7 +76,7 @@ public class GameUno implements IGameUno {
     /**
      * Handles the scenario when a player shouts "Uno", forcing the other player to draw a card.
      *
-     * @param playerWhoSang The player who shouted "Uno".
+     * @param playerWhoSang the player who shouted "Uno"
      */
     @Override
     public void haveSungOne(String playerWhoSang) {
@@ -86,8 +90,8 @@ public class GameUno implements IGameUno {
     /**
      * Retrieves the current visible cards of the human player starting from a specific position.
      *
-     * @param posInitCardToShow The initial position of the cards to show.
-     * @return An array of cards visible to the human player.
+     * @param posInitCardToShow the initial position of the cards to show
+     * @return an array of cards visible to the human player
      */
     @Override
     public Card[] getCurrentVisibleCardsHumanPlayer(int posInitCardToShow) {
@@ -105,7 +109,7 @@ public class GameUno implements IGameUno {
     /**
      * Checks if the game is over.
      *
-     * @return True if the deck is empty, indicating the game is over; otherwise, false.
+     * @return {@code true} if the deck is empty, indicating the game is over; otherwise, {@code false}
      */
     @Override
     public Boolean isGameOver() {

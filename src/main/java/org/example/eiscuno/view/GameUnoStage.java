@@ -13,7 +13,9 @@ import java.io.IOException;
 
 /**
  * Represents the main stage of the Uno game application.
- * This stage displays the game interface to the user.
+ *
+ * <p>This class initializes and displays the main game interface using a singleton pattern
+ * to ensure only one instance of the game stage exists.
  */
 public class GameUnoStage extends Stage {
 
@@ -47,7 +49,8 @@ public class GameUnoStage extends Stage {
 
     /**
      * Closes the instance of GameUnoStage.
-     * This method is used to clean up resources when the game stage is no longer needed.
+     *
+     * <p>This method is used to clean up resources when the game stage is no longer needed.
      */
     public static void deleteInstance() {
         GameUnoStageHolder.INSTANCE.close();
@@ -68,7 +71,8 @@ public class GameUnoStage extends Stage {
 
     /**
      * Holder class for the singleton instance of GameUnoStage.
-     * This class ensures lazy initialization of the singleton instance.
+     *
+     * <p>This class ensures lazy initialization of the singleton instance.
      */
     private static class GameUnoStageHolder {
         private static GameUnoStage INSTANCE;

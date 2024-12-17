@@ -34,7 +34,8 @@ import java.io.IOException;
 /**
  * Controller class for the Uno game.
  *
- * TODO: ERASE ALL THE DEBUG METHODS IN THIS AND OTHER CLASSES. STILL IN THIS VERSION.
+ * <p>This class manages the game's user interface, player interactions, game rules,
+ * and communication between the human player, the machine player, and game threads.
  */
 public class GameUnoController {
 
@@ -87,6 +88,9 @@ public class GameUnoController {
 
     /**
      * Initializes the controller.
+     *
+     * <p>Sets up the game, initializes variables, starts threads for machine actions,
+     * and configures user interface elements.
      */
     @FXML
     public void initialize() {
@@ -104,7 +108,6 @@ public class GameUnoController {
         this.tableImageView.setImage(cardInitial.getImage());
 
         colorPickers.setOpacity(0);
-        // Actualizar visualmente la mano de la máquina
         threadSingUNOMachine = new ThreadSingUNOMachine(this.humanPlayer.getCardsPlayer());
         Thread t = new Thread(threadSingUNOMachine, "ThreadSingUNO");
         threadMonitorMachine = new ThreadMonitorMachine(this.machinePlayer);
@@ -120,17 +123,15 @@ public class GameUnoController {
         threadMonitorMachine.start();
         threadMonitorMachine.setOnMachineHasOneCardCallback(this::showPenalizeButton);
         threadMonitorMachine.setOnMachineSaidUnoCallback(this::hidePenalizeButton);
-
         threadSingUNOMachine.setOnUnoSang(this::penalizeHumanUNO);
 
         writeOnColorInfo();
         writeOnTurnInfo();
         hidePenalizeButton();
-
     }
 
     /**
-     * Initializes the variables for the game.
+     * Initializes the game variables including players, deck, and table.
      */
     private void initVariables() {
         this.humanPlayer = new Player("HUMAN_PLAYER");
@@ -143,6 +144,10 @@ public class GameUnoController {
         rules = new cardRules(gameUno);
     }
 
+
+    /**
+     * Animates the cards drawn effect for special cards like +2 and +4.
+     */
     private void animateDrawedCards() {
         Card actualCard = table.getCurrentCardOnTheTable();
         if (actualCard.getValue().equals("+4")) {
@@ -158,13 +163,20 @@ public class GameUnoController {
         sequentialTransition.play();
     }
 
+
+    /**
+     * Updates UI after animations and machine actions.
+     */
     private void runAnimationAndUpdate(){
         printCardsHumanPlayer();
-        printCardsMachinePlayer();
         printCardsMachinePlayer();
         animateDrawedCards();
     }
 
+
+    /**
+     * Updates UI after the machine plays a card.
+     */
     private void runUpdateMachinePlay(){
         printCardsMachinePlayer();
         writeOnColorInfo();
@@ -172,6 +184,9 @@ public class GameUnoController {
         checkGameEnd();
     }
 
+    /**
+     * Updates UI after the machine draws a card.
+     */
     private void runUpdateMachineAte(){
         printCardsMachinePlayer();
         writeOnTurnInfo();
@@ -179,22 +194,28 @@ public class GameUnoController {
         checkGameEnd();
     }
 
+
+    /**
+     * Updates the color display field with the current card color.
+     */
     private void writeOnColorInfo(){
         colorTxtField.setText(table.getCurrentCardOnTheTable().getColor());
     }
 
+    /**
+     * Updates the turn display field to indicate the current turn.
+     */
     private void writeOnTurnInfo(){
         if(threadPlayMachine.getHasPlayerPlayed()){
             turnTxtField.setText("Machine");
         } else{
             turnTxtField.setText("Human");
         }
-
     }
 
 
     /**
-     * Prints the human player's cards on the grid pane.
+     * Displays the human player's cards on the grid pane.
      */
     private void printCardsHumanPlayer() {
         this.gridPaneCardsPlayer.getChildren().clear();
@@ -204,11 +225,16 @@ public class GameUnoController {
             Card card = currentVisibleCardsHumanPlayer[i];
             ImageView cardImageView = card.getCard();
             setCardClickHandler(card, cardImageView);
-
             this.gridPaneCardsPlayer.add(cardImageView, i, 0);
         }
     }
 
+    /**
+     * Sets a click handler on a card that allows the player to attempt playing the card.
+     *
+     * @param card          the card to set the handler on
+     * @param cardImageView the ImageView representation of the card
+     */
     private void setCardClickHandler(Card card, ImageView cardImageView) {
         cardImageView.setOnMouseClicked((MouseEvent event) -> {
             if (threadPlayMachine.getHasPlayerPlayed()) {
@@ -229,11 +255,23 @@ public class GameUnoController {
         });
     }
 
+    /**
+     * Determines if a card can be played based on the current card on the table.
+     *
+     * @param card        the card the player wants to play
+     * @param cardInitial the current card on the table
+     * @return {@code true} if the card can be played, otherwise {@code false}
+     */
     private boolean isCardPlayable(Card card, Card cardInitial) {
         return cardInitial.getColor().equals(card.getColor()) || cardInitial.getValue().equals(card.getValue()) ||
                 "WILD_CARD".equals(card.getValue()) || "WILD".equals(card.getColor());
     }
 
+    /**
+     * Plays the selected card and processes its effects.
+     *
+     * @param card the card to be played
+     */
     private void playCard(Card card) {
         if ("WILD".equals(card.getColor())) {
             playWildCard(card);
@@ -243,6 +281,11 @@ public class GameUnoController {
         checkGameEnd();
     }
 
+    /**
+     * Handles the action of playing a wild card, including color selection and effects.
+     *
+     * @param card the wild card played
+     */
     private void playWildCard(Card card) {
         gameUno.playCard(card);
         tableImageView.setImage(card.getImage());
@@ -261,6 +304,11 @@ public class GameUnoController {
         colorPicker(card);
     }
 
+    /**
+     * Handles the action of playing a regular card and processes its effects.
+     *
+     * @param card the regular card played
+     */
     private void playRegularCard(Card card) {
         rules.applySpecialCardEffect(card, machinePlayer);
         gameUno.playCard(card);
@@ -276,6 +324,12 @@ public class GameUnoController {
         handleSpecialCardEffects(card);
     }
 
+
+    /**
+     * Handles the special effects of cards like REVERSE, SKIP, and +2.
+     *
+     * @param card the card with a special effect
+     */
     private void handleSpecialCardEffects(Card card) {
         if (card.getValue().equals("REVERSE") || card.getValue().equals("SKIP") || card.getValue().equals("+2")) {
             if (card.getValue().equals("+2")) {
@@ -291,6 +345,12 @@ public class GameUnoController {
         }
     }
 
+
+    /**
+     * Opens the color picker when a wild card is played.
+     *
+     * @param card the wild card triggering the color picker
+     */
     private void colorPicker(Card card) {
         colorPickers.setOpacity(1);
 
@@ -312,13 +372,27 @@ public class GameUnoController {
         });
     }
 
+
+    /**
+     * Exception thrown when an invalid move is attempted.
+     */
     public class InvalidMoveException extends Exception {
+        /**
+         * Constructs an InvalidMoveException with the specified message.
+         *
+         * @param message the detail message of the exception
+         */
         public InvalidMoveException(String message) {
             super(message);
         }
     }
 
 
+    /**
+     * Handles the color selection for wild cards.
+     *
+     * @param card the wild card being played
+     */
     private void handleColorPick(Card card) {
         if (selectedColor == null) {
             System.out.println("No se ha seleccionado un color.");
@@ -338,6 +412,12 @@ public class GameUnoController {
         }
     }
 
+    /**
+     * Converts the selected color string to a valid color.
+     *
+     * @param selectedColor the color string selected by the player
+     * @return the valid color string or null if invalid
+     */
     private String getPickedColor(String selectedColor) {
         switch (selectedColor) {
             case "RED": return "RED";
@@ -348,6 +428,10 @@ public class GameUnoController {
         }
     }
 
+
+    /**
+     * Displays the machine player's cards as back-facing cards on the grid pane.
+     */
     private void printCardsMachinePlayer() {
         this.gridPaneCardsMachine.getChildren().clear();
         this.gridPaneCardsMachine.getColumnConstraints().clear();
@@ -371,6 +455,12 @@ public class GameUnoController {
         }
     }
 
+    /**
+     * Finds the position of a specific card in the human player's hand.
+     *
+     * @param card the card to find in the player's hand
+     * @return the index of the card if found, or {@code -1} if not found
+     */
     private Integer findPosCardsHumanPlayer(Card card) {
         for (int i = 0; i < this.humanPlayer.getCardsPlayer().size(); i++) {
             if (this.humanPlayer.getCardsPlayer().get(i).equals(card)) {
@@ -380,6 +470,12 @@ public class GameUnoController {
         return -1;
     }
 
+
+    /**
+     * Handles the "Back" button action to navigate to the previous set of cards.
+     *
+     * @param event the action event triggered by the user
+     */
     @FXML
     void onHandleBack(ActionEvent event) {
         if (this.posInitCardToShow > 0) {
@@ -389,9 +485,9 @@ public class GameUnoController {
     }
 
     /**
-     * Handles the "Next" button action to show the next set of cards.
+     * Handles the "Next" button action to navigate to the next set of cards.
      *
-     * @param event the action event
+     * @param event the action event triggered by the user
      */
     @FXML
     void onHandleNext(ActionEvent event) {
@@ -401,26 +497,36 @@ public class GameUnoController {
         }
     }
 
+    /**
+     * Checks if the human player has a valid card to play.
+     *
+     * @return {@code true} if the player has a valid card to play
+     * @throws InvalidMoveException if the player has no valid cards to play
+     */
     private boolean hasValidCardToPlay() throws InvalidMoveException {
-        // Obtener la última carta en la mesa
+        // Get the last card on the table
         Card currentCardOnTable = this.table.getCurrentCardOnTheTable();
 
-        // Verificar si el jugador tiene alguna carta válida
+        // Check if the player has a valid card to play
         for (Card card : this.humanPlayer.getCardsPlayer()) {
             if (card.getColor().equals(currentCardOnTable.getColor()) ||
                     card.getValue().equals(currentCardOnTable.getValue()) ||
                     "WILD".equals(card.getColor())) {
-                return true;  // El jugador tiene una carta válida para jugar
+                return true;  // The player has a valid card to play
             }
         }
-        // Lanzar la excepción si no hay carta válida para jugar
+        // Throw an exception if no valid card is available
         throw new InvalidMoveException("No tienes cartas válidas para jugar.");
     }
 
 
+    /**
+     * Prints debugging information about a selected card.
+     *
+     * @param card the card to display information for
+     */
     private void debugCardInfo(Card card) {
         if (card != null) {
-            // Si la carta es de tipo WILD o de color normal
             String cardInfo = "Carta seleccionada: ";
             if ("WILD".equals(card.getValue())) {
                 cardInfo += "Tipo: WILD, ";
@@ -428,40 +534,38 @@ public class GameUnoController {
                 cardInfo += "Tipo: " + card.getColor() + ", ";
             }
             cardInfo += "Número: " + card.getValue();
-            System.out.println(cardInfo);  // Imprime la información de la carta
+            System.out.println(cardInfo); // Print the card's details to the console
         }
     }
 
     /**
-     * Handles the action of taking a card.
+     * Handles the action of taking a card when the player has no valid moves.
      *
-     * @param event the action event
+     * @param event the action event triggered when the player clicks the "Take Card" button
      */
     @FXML
     void onHandleTakeCard(ActionEvent event) {
-        // Verificar si es el turno del jugador
+        // Check if it's already the player's turn
         if (isPlayerTurnOver()) {
-            return; // Si ya jugó, no permitir que robe más cartas.
+            return; // If the player has already played, they cannot take more cards.
         }
 
-        if(unoButton.isVisible()){
+        if (unoButton.isVisible()) {
             System.out.println("TIENES QUE CANTAR UNO!!!");
             return;
         }
 
         try {
-            // Verificar si el jugador tiene cartas válidas para jugar
+            // Verify if the player has any valid cards to play
             if (hasValidCardToPlay()) {
                 System.out.println("Tienes cartas válidas para jugar, debes jugar una carta.");
-                return;  // Si tiene cartas válidas, no permite robar más cartas
+                return; // Do not allow the player to draw a card if they have a valid move.
             }
         } catch (InvalidMoveException e) {
-            takeCardAndPrint();
-
-            // Manejar la excepción si el jugador no tiene cartas válidas
+            takeCardAndPrint(); // If no valid moves exist, draw a card and print the updated hand.
         }
 
-        // Verificar si la última carta del jugador es válida para jugar
+        // Verify if the last drawn card can be played
         if (isLastCardPlayable()) {
             System.out.println("La carta robada es válida, puedes jugarla.");
         } else {
@@ -470,7 +574,11 @@ public class GameUnoController {
         }
     }
 
-
+    /**
+     * Checks if the player's turn is already over.
+     *
+     * @return {@code true} if the player has already played their turn, otherwise {@code false}
+     */
     private boolean isPlayerTurnOver() {
         if (threadPlayMachine.getHasPlayerPlayed()) {
             System.out.println("Ya jugaste, no puedes robar más cartas.");
@@ -479,12 +587,20 @@ public class GameUnoController {
         return false;
     }
 
+    /**
+     * Makes the player draw one card from the deck and updates the UI.
+     */
     private void takeCardAndPrint() {
         this.gameUno.eatCard(this.humanPlayer, 1);
         printCardsHumanPlayer();
         checkGameEnd();
     }
 
+    /**
+     * Determines if the last card in the player's hand can be played.
+     *
+     * @return {@code true} if the last card is playable, otherwise {@code false}
+     */
     private boolean isLastCardPlayable() {
         Card lastCard = this.humanPlayer.getCardsPlayer().get(this.humanPlayer.getCardsPlayer().size() - 1);
         Card currentCardOnTable = this.table.getCurrentCardOnTheTable();
@@ -494,15 +610,17 @@ public class GameUnoController {
                 "WILD".equals(lastCard.getColor()) || "WILD".equals(lastCard.getValue());
     }
 
-    private void skipTurn() {
-        threadPlayMachine.setHasPlayerPlayed(true);
-        writeOnTurnInfo(); // Saltar el turno del jugador
-    }
-
 
     /**
-     * Handles the action of saying "Uno".
-     *
+     * Skips the player's turn if they cannot play a valid card.
+     */
+    private void skipTurn() {
+        threadPlayMachine.setHasPlayerPlayed(true);
+        writeOnTurnInfo(); // Update the UI to reflect that the player's turn is skipped.
+    }
+
+    /**
+     * Checks if the human player has only one card left and displays the UNO button.
      */
     private void checkUNO() {
         if (humanPlayer.getCardsPlayer().size() == 1) {
@@ -510,6 +628,11 @@ public class GameUnoController {
         }
     }
 
+    /**
+     * Handles the action of saying "Uno" when the player has one card left.
+     *
+     * @param event the action event triggered when the UNO button is clicked
+     */
     @FXML
     public void onHandleUno(ActionEvent event) {
         if (humanPlayer.getCardsPlayer().size() == 1) {
@@ -519,71 +642,81 @@ public class GameUnoController {
     }
 
 
+    /**
+     * Penalizes the human player if they fail to declare UNO on time.
+     */
     private void penalizeHumanUNO() {
-        if(unoButton.isVisible()){
-            gameUno.eatCard(humanPlayer, 2); // Penalización con 2 cartas
+        if (unoButton.isVisible()) {
+            gameUno.eatCard(humanPlayer, 2); // Penalize with 2 cards
             printCardsHumanPlayer();
             unoButton.setVisible(false);
             System.out.println("No declaraste UNO a tiempo. Penalizado con 2 cartas.");
         }
-
     }
 
+    /**
+     * Penalizes the machine player if it fails to declare UNO on time.
+     */
     private void penalizeMachineUNO() {
-        gameUno.eatCard(machinePlayer, 2); // Penalización con 2 cartas
+        gameUno.eatCard(machinePlayer, 2); // Penalize with 2 cards
         printCardsMachinePlayer();
         System.out.println("La máquina no declaró UNO a tiempo. Penalizada con 2 cartas.");
     }
 
 
     /**
-     * Verifica si el jugador humano o la máquina han ganado la partida.
+     * Checks if the game has ended and updates the UI accordingly.
      */
     private void checkGameEnd() {
         if (humanPlayer.getCardsPlayer().isEmpty()) {
             killThreads();
-            gameStatusLabel.setText("¡YOU WON!");
-            showEndGameAlert("¡Victory!", "¡You won the UNO game! 🎉", Alert.AlertType.INFORMATION);
+            gameStatusLabel.setText("YOU WON!");
+            showEndGameAlert("Victory", "You won the UNO game!", Alert.AlertType.INFORMATION);
         } else if (machinePlayer.getCardsPlayer().isEmpty()) {
             killThreads();
             gameStatusLabel.setText("YOU LOST");
-            showEndGameAlert("Defeat", "I'm sorry, you've lost the game. 😞", Alert.AlertType.ERROR);
-            killThreads();
+            showEndGameAlert("Defeat", "The machine won the game.", Alert.AlertType.ERROR);
         }
     }
 
+    /**
+     * Displays an end-of-game alert with options to close or restart the game.
+     *
+     * @param title     the title of the alert
+     * @param content   the message content to display
+     * @param alertType the type of alert (e.g., INFORMATION, ERROR)
+     */
     private void showEndGameAlert(String title, String content, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
-        alert.setHeaderText(null); // No queremos un encabezado
+        alert.setHeaderText(null); // No header text
         alert.setContentText(content);
 
-        // Botones personalizados para la alerta
+        // Custom buttons for the alert
         ButtonType closeButton = new ButtonType("Close");
         ButtonType replayButton = new ButtonType("Play again");
 
         alert.getButtonTypes().setAll(replayButton, closeButton);
 
-        // Mostrar y esperar la acción del usuario
+        // Show and handle user response
         alert.showAndWait().ifPresent(response -> {
             if (response == replayButton) {
                 restartGame();
             } else {
-                Platform.exit(); // Salir de la aplicación
+                Platform.exit(); // Exit the application
             }
         });
     }
 
+    /**
+     * Restarts the game by closing the current instance and creating a new one.
+     */
     private void restartGame() {
         try {
-            // Cerrar la instancia actual
-            GameUnoStage.deleteInstance();
-
-            // Crear una nueva instancia del juego
-            GameUnoStage.getInstance();
+            GameUnoStage.deleteInstance(); // Close the current game instance
+            GameUnoStage.getInstance();    // Start a new game instance
         } catch (IOException e) {
             e.printStackTrace();
-            // Mostrar una alerta si ocurre un error
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
             errorAlert.setTitle("Error");
             errorAlert.setHeaderText("No se pudo reiniciar el juego");
@@ -593,29 +726,50 @@ public class GameUnoController {
     }
 
 
-    public void showPenalizeButton(){
+    /**
+     * Displays the penalize button when the machine has one card left.
+     */
+    public void showPenalizeButton() {
         penalizeButton.setVisible(true);
         penalizeButtonView.setOpacity(1);
     }
 
-    public void hidePenalizeButton(){
+
+    /**
+     * Hides the penalize button when the machine has declared UNO.
+     */
+    public void hidePenalizeButton() {
         penalizeButtonView.setOpacity(0);
         penalizeButton.setVisible(false);
     }
 
+    /**
+     * Handles the action of penalizing the machine if it fails to declare UNO.
+     *
+     * @param actionEvent the action event triggered when the penalize button is clicked
+     */
     public void handlePenalizeMachine(ActionEvent actionEvent) {
-        if(!threadMonitorMachine.didMachineSayUno){
+        if (!threadMonitorMachine.didMachineSayUno) {
             penalizeMachineUNO();
             hidePenalizeButton();
         }
     }
 
-    public void killThreads(){
+
+    /**
+     * Stops all active game threads to clean up resources.
+     */
+    public void killThreads() {
         threadMonitorMachine.stopMonitoring();
         threadPlayMachine.stopMachinePlay();
         threadSingUNOMachine.stopMonitoringUnoSang();
     }
 
+    /**
+     * Handles the action of exiting the game.
+     *
+     * @param mouseEvent the mouse event triggered when the exit option is clicked
+     */
     public void handleExitGame(MouseEvent mouseEvent) {
         killThreads();
         GameUnoStage.deleteInstance();

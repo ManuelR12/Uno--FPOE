@@ -10,6 +10,12 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test class for the {@link Table} class.
+ *
+ * <p>Contains unit tests to verify the functionality of the Table class, including adding
+ * cards, retrieving the current card, initializing the first card, and updating the current card color.
+ */
 class TableTest {
     private final Table table = new Table();
     private final Deck deck = new Deck();
@@ -26,7 +32,7 @@ class TableTest {
     }
 
     /**
-     * Test to verify that a card can be added to the table and becomes the current card.
+     * Tests that a card can be added to the table and becomes the current card.
      */
     @Test
     void testAddCardOnTheTable() {
@@ -39,7 +45,7 @@ class TableTest {
     }
 
     /**
-     * Test to verify that the current card on the table updates correctly when a new card is added.
+     * Tests that the current card on the table updates correctly when a new card is added.
      */
     @Test
     void testGetCurrentCardOnTheTable() {
@@ -55,7 +61,7 @@ class TableTest {
     }
 
     /**
-     * Test to verify the initial card on the table is within valid range.
+     * Tests that the first card placed on the table is within a valid numeric range.
      */
     @Test
     void testFirstCard() {
@@ -68,7 +74,7 @@ class TableTest {
     }
 
     /**
-     * Test to verify that the current card color on the table can be updated.
+     * Tests that the current card's color on the table can be updated.
      */
     @Test
     void testSetCurrentCardColor() {
@@ -85,6 +91,8 @@ class TableTest {
 
     /**
      * Helper method to get a random color from the predefined COLORS array.
+     *
+     * @return a randomly selected color string
      */
     private String getRandomColor() {
         Random random = new Random();

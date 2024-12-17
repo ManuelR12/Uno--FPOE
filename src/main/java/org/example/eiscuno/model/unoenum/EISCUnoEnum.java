@@ -1,9 +1,10 @@
 package org.example.eiscuno.model.unoenum;
 
 /**
- * Enum EISCUnoEnum
+ * Enum representing the file paths for the images used in the EISC Uno game.
  *
- * This enum represents the various file paths for the images used in the EISC Uno game.
+ * <p>This enum centralizes the image resources for cards, buttons, and other graphical
+ * elements, making them easily accessible throughout the application.
  */
 public enum EISCUnoEnum {
     FAVICON("favicon.png"),
@@ -71,7 +72,7 @@ public enum EISCUnoEnum {
     private static final String PATH = "/org/example/eiscuno/";
 
     /**
-     * Constructor for the EISCUnoEnum enum.
+     * Constructs an enum constant with the specified relative file path.
      *
      * @param filePath the file path of the image relative to the base directory
      */
